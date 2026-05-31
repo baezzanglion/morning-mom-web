@@ -6,7 +6,7 @@
 <title>따뜻한 메시지 카드 · morning-mom</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Hi+Melody&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#faf6f0;--card:#fff;--fg:#3c322d;--muted:#8a7a6f;
@@ -118,6 +118,43 @@
     background:transparent;color:var(--muted);border:none;
   }
   .from-gallery button:hover{background:transparent;color:var(--fg)}
+  .font-grid{flex-wrap:wrap;gap:12px}
+  .font-grid label{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--warm)}
+  .font-grid label:has(input:checked){border-color:var(--accent);background:#fff}
+  .theme-grid{flex-wrap:wrap;gap:12px;margin-bottom:8px}
+  .theme-chips{
+    display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px 6px 6px;border:1px solid var(--border);
+    border-radius:999px;background:var(--warm);cursor:pointer;
+    font-size:13px;
+  }
+  .chip:has(input:checked){border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px rgba(170,130,125,0.18)}
+  .chip input{display:none}
+  .chip-swatch{
+    width:22px;height:22px;border-radius:50%;border:1px solid var(--border);
+    display:inline-block;
+  }
+  .custom-colors{
+    display:flex;gap:18px;margin-top:8px;padding:10px;
+    background:var(--warm);border:1px solid var(--border);border-radius:8px;
+  }
+  .color-row{
+    display:flex;align-items:center;gap:8px;margin:0;
+    font-size:13px;color:var(--fg);font-weight:600;
+  }
+  .color-row input[type=color]{
+    width:48px;height:32px;padding:0;border:1px solid var(--border);
+    border-radius:6px;background:none;cursor:pointer;
+  }
+  .polaroid-row{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;
+  }
+  .toggle{
+    display:flex;align-items:center;gap:6px;margin:0;font-size:14px;cursor:pointer;
+  }
   footer{
     text-align:center;color:var(--muted);font-size:12px;
     margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
@@ -169,10 +206,38 @@
       <small>의미단위 줄바꿈은 <code>|</code>, 강조할 한 줄은 <code>**...**</code></small>
 
       <label>폰트</label>
-      <fieldset>
-        <label><input type="radio" name="font" value="gaegu" checked> 둥근 손글씨</label>
-        <label><input type="radio" name="font" value="gowun"> 차분한 명조</label>
+      <fieldset class="font-grid">
+        <label><input type="radio" name="font" value="gaegu" checked> <span style="font-family:'Gaegu',cursive;font-size:18px">둥근 손글씨</span></label>
+        <label><input type="radio" name="font" value="gowun"> <span style="font-family:'Gowun Batang',serif">차분한 명조</span></label>
+        <label><input type="radio" name="font" value="pen"> <span style="font-family:'Nanum Pen Script',cursive;font-size:20px">잉크펜</span></label>
+        <label><input type="radio" name="font" value="brush"> <span style="font-family:'Nanum Brush Script',cursive;font-size:20px">붓글씨</span></label>
+        <label><input type="radio" name="font" value="melody"> <span style="font-family:'Hi Melody',cursive;font-size:18px">멜로디</span></label>
       </fieldset>
+
+      <label>색 테마</label>
+      <fieldset class="theme-grid">
+        <label><input type="radio" name="color-mode" value="theme" checked> 테마</label>
+        <label><input type="radio" name="color-mode" value="custom"> 직접 선택</label>
+      </fieldset>
+      <div id="theme-options" class="theme-chips">
+        <label class="chip"><input type="radio" name="theme" value="beige" checked><span class="chip-swatch" style="background:linear-gradient(135deg,#f7f0e8,#e4d4cd)"></span>🌅 베이지</label>
+        <label class="chip"><input type="radio" name="theme" value="charcoal"><span class="chip-swatch" style="background:linear-gradient(135deg,#46413c,#2d2826)"></span>🌙 차콜</label>
+        <label class="chip"><input type="radio" name="theme" value="pink"><span class="chip-swatch" style="background:linear-gradient(135deg,#fce8e8,#f0d4da)"></span>💐 핑크</label>
+        <label class="chip"><input type="radio" name="theme" value="mint"><span class="chip-swatch" style="background:linear-gradient(135deg,#e8f5ee,#d4e8de)"></span>🌿 민트</label>
+        <label class="chip"><input type="radio" name="theme" value="lavender"><span class="chip-swatch" style="background:linear-gradient(135deg,#f0ebfa,#dedaf0)"></span>☁️ 라벤더</label>
+      </div>
+      <div id="custom-options" class="custom-colors" hidden>
+        <label class="color-row">배경 <input type="color" id="bg-color" value="#faf6f0"></label>
+        <label class="color-row">글씨 <input type="color" id="fg-color" value="#3c322d"></label>
+      </div>
+
+      <label>📷 폴라로이드 (사진 추가)</label>
+      <div class="polaroid-row">
+        <label class="toggle"><input type="checkbox" id="polaroid-mode"> 폴라로이드 모드</label>
+        <input type="file" id="photo-upload" accept="image/*" style="display:none">
+        <button id="upload-btn" type="button" class="ghost" style="margin-top:0;padding:8px 14px;font-size:13px">사진 선택</button>
+        <span id="photo-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
 
       <div class="row">
         <button id="download">📥 PNG 다운로드</button>
@@ -210,13 +275,27 @@
 <script>
 // ── 카드 렌더링 ─────────────────────────
 const W=1080,H=1080;
-const BG_TOP='rgb(247,240,232)',BG_BOT='rgb(228,212,205)';
-const FG='rgb(60,50,45)',ACCENT='rgb(170,130,125)';
 
+// 폰트 프리셋 (시각적 크기 균형 맞춤)
 const PRESETS={
-  gaegu:{family:"'Gaegu',cursive",size:102,line:1.30,foot:38},
-  gowun:{family:"'Gowun Batang',serif",size:72,line:1.45,foot:30},
+  gaegu:  {family:"'Gaegu',cursive",                size:102, line:1.30, foot:38},
+  gowun:  {family:"'Gowun Batang',serif",           size:72,  line:1.45, foot:30},
+  pen:    {family:"'Nanum Pen Script',cursive",     size:120, line:1.10, foot:44},
+  brush:  {family:"'Nanum Brush Script',cursive",   size:115, line:1.15, foot:42},
+  melody: {family:"'Hi Melody',cursive",            size:95,  line:1.30, foot:36},
 };
+
+// 테마 (배경 그라데이션 + 본문 + 푸터 색 한 세트)
+const THEMES={
+  beige:    {bgTop:'rgb(247,240,232)', bgBot:'rgb(228,212,205)', fg:'rgb(60,50,45)',    accent:'rgb(170,130,125)', label:'🌅 베이지'},
+  charcoal: {bgTop:'rgb(70,65,60)',    bgBot:'rgb(45,40,38)',    fg:'rgb(245,235,220)', accent:'rgb(210,180,160)', label:'🌙 차콜'},
+  pink:     {bgTop:'rgb(252,232,232)', bgBot:'rgb(240,212,218)', fg:'rgb(80,40,55)',    accent:'rgb(180,100,120)', label:'💐 핑크'},
+  mint:     {bgTop:'rgb(232,245,238)', bgBot:'rgb(212,232,222)', fg:'rgb(40,75,60)',    accent:'rgb(100,160,130)', label:'🌿 민트'},
+  lavender: {bgTop:'rgb(240,235,250)', bgBot:'rgb(222,218,240)', fg:'rgb(50,45,90)',    accent:'rgb(130,120,180)', label:'☁️ 라벤더'},
+};
+
+// 업로드된 사진 (폴라로이드용) — Image 객체로 캐싱
+let uploadedPhoto=null;
 
 function parseChunks(msg){
   const raw=msg.replace(/\|/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
@@ -249,6 +328,49 @@ function wrap(ctx,text,maxW){
   return lines;
 }
 
+// 현재 선택된 색 옵션 반환 (테마 모드 vs 커스텀 모드)
+function getColors(){
+  const mode=document.querySelector('input[name="color-mode"]:checked').value;
+  if(mode==='custom'){
+    const bg=document.getElementById('bg-color').value;
+    const fg=document.getElementById('fg-color').value;
+    return {bgTop:bg, bgBot:bg, fg:fg, accent:fg, mode:'custom'};
+  }
+  const themeKey=document.querySelector('input[name="theme"]:checked')?.value||'beige';
+  return {...THEMES[themeKey], mode:'theme'};
+}
+
+// 폴라로이드 합성: 사진을 카드 상단에 흰 프레임으로 얹음. 반환 = 폴라로이드 끝 y
+function drawPolaroid(ctx, photo){
+  const photoW=580, photoH=440;
+  const borderTop=25, borderSide=25, borderBottom=80;
+  const polaroidW=photoW+borderSide*2;
+  const polaroidH=photoH+borderTop+borderBottom;
+  const px=Math.floor((W-polaroidW)/2);
+  const py=70;
+  // 그림자
+  ctx.save();
+  ctx.shadowColor='rgba(60,40,30,0.35)';
+  ctx.shadowBlur=24;
+  ctx.shadowOffsetY=6;
+  ctx.fillStyle='#fff';
+  ctx.fillRect(px, py, polaroidW, polaroidH);
+  ctx.restore();
+  // 사진 center-crop fit (ImageBitmap·HTMLImageElement 모두 width/height 사용 가능)
+  const pw=photo.width||photo.naturalWidth;
+  const ph=photo.height||photo.naturalHeight;
+  const srcR=pw/ph;
+  const tgtR=photoW/photoH;
+  let sx=0,sy=0,sw=pw,sh=ph;
+  if(srcR>tgtR){
+    sw=ph*tgtR; sx=(pw-sw)/2;
+  } else {
+    sh=pw/tgtR; sy=(ph-sh)/2;
+  }
+  ctx.drawImage(photo, sx, sy, sw, sh, px+borderSide, py+borderTop, photoW, photoH);
+  return py+polaroidH;
+}
+
 function drawCard(){
   const canvas=document.getElementById('card');
   const ctx=canvas.getContext('2d');
@@ -256,18 +378,29 @@ function drawCard(){
   const preset=PRESETS[fontKey];
   const message=document.getElementById('message').value;
   const recipient=document.getElementById('recipient').value.trim()||'당신';
+  const isPolaroid=document.getElementById('polaroid-mode').checked && uploadedPhoto;
+  const colors=getColors();
 
-  // 배경 그라데이션
-  const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,BG_TOP);g.addColorStop(1,BG_BOT);
-  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // 배경 (그라데이션 또는 단색)
+  if(colors.bgTop===colors.bgBot){
+    ctx.fillStyle=colors.bgTop; ctx.fillRect(0,0,W,H);
+  } else {
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,colors.bgTop); g.addColorStop(1,colors.bgBot);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+
+  // 폴라로이드 (사진 있을 때만)
+  let bodyTopOverride=null;
+  if(isPolaroid){
+    const endY=drawPolaroid(ctx, uploadedPhoto);
+    bodyTopOverride=endY+30;
+  }
 
   // 본문
-  ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle=FG;
-  const baseSize=preset.size;
+  ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=colors.fg;
+  const baseSize=isPolaroid? Math.floor(preset.size*0.78) : preset.size;
   const chunks=parseChunks(message);
-
-  // 청크별 wrap (대부분 그대로 한 줄이지만, 너무 길면 자동 줄바꿈)
   const renderLines=[];
   for(const {text,bold} of chunks){
     ctx.font=`${bold?'700':'400'} ${baseSize}px ${preset.family}`;
@@ -277,8 +410,13 @@ function drawCard(){
   }
   const lineH=Math.floor(baseSize*preset.line);
   const totalH=lineH*renderLines.length;
-  let y=Math.floor((H-totalH)/2)-30;
-
+  let y;
+  if(bodyTopOverride!=null){
+    const availH=H-bodyTopOverride-100;
+    y=bodyTopOverride+Math.max(0,(availH-totalH)/2);
+  } else {
+    y=Math.floor((H-totalH)/2)-30;
+  }
   for(const {text,bold} of renderLines){
     ctx.font=`${bold?'700':'400'} ${baseSize}px ${preset.family}`;
     ctx.fillText(text,W/2,y);
@@ -288,8 +426,8 @@ function drawCard(){
   // 푸터
   const today=new Date().toISOString().slice(0,10);
   ctx.font=`400 ${preset.foot}px ${preset.family}`;
-  ctx.fillStyle=ACCENT;
-  ctx.fillText(`${today}  ·  ${recipient}에게`,W/2,H-130);
+  ctx.fillStyle=colors.accent;
+  ctx.fillText(`${today}  ·  ${recipient}에게`,W/2,H-80);
 }
 
 // ── 다운로드 / 복사 ─────────────────────
@@ -448,6 +586,59 @@ function renderSuggestions(arr){
 });
 document.querySelectorAll('input[name="font"]').forEach(r=>{
   r.addEventListener('change',drawCard);
+});
+
+// 테마/커스텀 모드 토글
+const themeOpts=document.getElementById('theme-options');
+const customOpts=document.getElementById('custom-options');
+function syncColorMode(){
+  const mode=document.querySelector('input[name="color-mode"]:checked').value;
+  themeOpts.hidden = mode!=='theme';
+  customOpts.hidden = mode!=='custom';
+  drawCard();
+}
+document.querySelectorAll('input[name="color-mode"]').forEach(r=>{
+  r.addEventListener('change',syncColorMode);
+});
+document.querySelectorAll('input[name="theme"]').forEach(r=>{
+  r.addEventListener('change',drawCard);
+});
+document.getElementById('bg-color').addEventListener('input',drawCard);
+document.getElementById('fg-color').addEventListener('input',drawCard);
+
+// 폴라로이드 모드 + 사진 업로드
+document.getElementById('polaroid-mode').addEventListener('change',drawCard);
+document.getElementById('upload-btn').addEventListener('click',()=>{
+  document.getElementById('photo-upload').click();
+});
+document.getElementById('photo-upload').addEventListener('change',async(e)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const status=document.getElementById('photo-status');
+  status.textContent='로딩 중...';
+  try{
+    // createImageBitmap with imageOrientation='from-image' → EXIF 자동 회전
+    uploadedPhoto=await createImageBitmap(file,{imageOrientation:'from-image'});
+    status.textContent=`✓ ${file.name}`;
+    document.getElementById('polaroid-mode').checked=true;
+    drawCard();
+  }catch(err){
+    // fallback: FileReader + Image (EXIF 회전 없음)
+    try{
+      const url=URL.createObjectURL(file);
+      const img=new Image();
+      img.onload=()=>{
+        uploadedPhoto=img;
+        status.textContent=`✓ ${file.name} (회전 미적용)`;
+        document.getElementById('polaroid-mode').checked=true;
+        drawCard();
+      };
+      img.onerror=()=>{status.textContent='이미지 로드 실패'};
+      img.src=url;
+    }catch(e2){
+      status.textContent='이미지 로드 실패: '+err.message;
+    }
+  }
 });
 
 // ── 갤러리 카드 수 표시 ─────────────────
