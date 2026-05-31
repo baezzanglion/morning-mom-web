@@ -91,6 +91,33 @@
   .warn{font-size:12px;color:#b85a3f;margin-top:6px;font-weight:600}
   .status{font-size:13px;color:var(--muted);margin-top:8px;min-height:18px}
   .preview-wrap{position:sticky;top:24px}
+  .gallery-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:14px;padding:10px 18px;
+    background:var(--warm);border:1px solid var(--accent);
+    border-radius:999px;color:var(--accent-h);
+    font-size:14px;font-weight:600;text-decoration:none;
+    transition:.15s;
+  }
+  .gallery-btn:hover{background:var(--accent);color:#fff}
+  .gallery-cta{
+    display:block;text-align:center;margin-top:14px;
+    padding:10px;background:var(--warm);
+    border:1px dashed var(--border);border-radius:8px;
+    color:var(--accent-h);text-decoration:none;font-size:13px;
+  }
+  .gallery-cta:hover{background:#f5ebdf}
+  .from-gallery{
+    margin-bottom:18px;padding:10px 14px;
+    background:#fdf4e8;border:1px solid #e8d4b8;
+    border-radius:8px;font-size:13px;color:var(--accent-h);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .from-gallery button{
+    margin:0;padding:4px 10px;font-size:12px;
+    background:transparent;color:var(--muted);border:none;
+  }
+  .from-gallery button:hover{background:transparent;color:var(--fg)}
   footer{
     text-align:center;color:var(--muted);font-size:12px;
     margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
@@ -104,14 +131,19 @@
   <header>
     <h1>따뜻한 메시지 카드</h1>
     <p class="subtitle">사랑하는 사람에게 한 줄, 손글씨 카드로</p>
-    <p style="margin-top:10px;font-size:14px">
-      <a href="gallery.html" style="color:var(--accent-h);text-decoration:none">→ 갤러리 보기</a>
-    </p>
+    <a href="gallery.html" class="gallery-btn" id="gallery-btn">
+      <span>📷</span><span>갤러리</span><span id="gallery-count" style="opacity:.7"></span>
+    </a>
   </header>
 
   <div class="layout">
 
     <section class="panel">
+      <div id="from-gallery" class="from-gallery" hidden>
+        <span>💌 갤러리에서 가져온 문구예요. 자유롭게 수정하세요.</span>
+        <button id="from-gallery-close" type="button" aria-label="닫기">✕</button>
+      </div>
+
       <label for="recipient">받는 사람 (호칭)</label>
       <input id="recipient" type="text" value="엄마" placeholder="엄마 / 아빠 / 친구 이름">
 
@@ -147,6 +179,8 @@
         <button id="copy" class="ghost">📋 이미지 복사</button>
       </div>
       <div class="status" id="action-status"></div>
+
+      <a href="gallery.html" class="gallery-cta">💌 다른 분들이 보낸 카드 둘러보기 →</a>
 
       <details>
         <summary>🔐 AI 호출용 API key 설정 (선택)</summary>
@@ -415,6 +449,40 @@ function renderSuggestions(arr){
 document.querySelectorAll('input[name="font"]').forEach(r=>{
   r.addEventListener('change',drawCard);
 });
+
+// ── 갤러리 카드 수 표시 ─────────────────
+(async()=>{
+  try{
+    const res=await fetch('manifest.json?v='+Date.now());
+    if(!res.ok) return;
+    const items=await res.json();
+    const el=document.getElementById('gallery-count');
+    if(el) el.textContent=`(${items.length}장)`;
+  }catch(e){/* 카운트는 실패해도 무시 */}
+})();
+
+// ── URL 파라미터 pre-fill (갤러리 → 카드 만들기) ─
+(()=>{
+  const params=new URLSearchParams(location.search);
+  const msg=params.get('message');
+  const tone=params.get('tone');
+  let used=false;
+  if(msg){
+    document.getElementById('message').value=msg;
+    used=true;
+  }
+  if(tone && ['다정','위트','차분'].includes(tone)){
+    document.getElementById('tone').value=tone;
+    used=true;
+  }
+  if(used){
+    const notice=document.getElementById('from-gallery');
+    notice.hidden=false;
+    document.getElementById('from-gallery-close').addEventListener('click',()=>{
+      notice.hidden=true;
+    });
+  }
+})();
 
 // 폰트 로드 후 초기 렌더
 document.fonts.ready.then(drawCard);

@@ -57,13 +57,23 @@
   .lightbox{
     position:fixed;inset:0;background:rgba(40,30,25,.92);
     display:none;align-items:center;justify-content:center;
+    flex-direction:column;gap:18px;
     padding:20px;cursor:pointer;z-index:100;
   }
   .lightbox.open{display:flex}
   .lightbox img{
-    max-width:95vw;max-height:95vh;border-radius:8px;
+    max-width:95vw;max-height:80vh;border-radius:8px;
     box-shadow:0 24px 60px rgba(0,0,0,.5);
   }
+  .lightbox-action{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 22px;background:var(--accent);color:#fff;
+    border:none;border-radius:999px;font-family:inherit;
+    font-size:15px;font-weight:600;cursor:pointer;
+    text-decoration:none;transition:.15s;
+    box-shadow:0 4px 14px rgba(0,0,0,.3);
+  }
+  .lightbox-action:hover{background:var(--accent-h)}
   footer{
     text-align:center;color:var(--muted);font-size:12px;
     margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
@@ -88,7 +98,10 @@
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty" hidden>아직 카드가 없어요. 첫 카드를 만들어보세요 →</div>
 
-  <div class="lightbox" id="lightbox"><img id="lightbox-img" alt=""></div>
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-img" alt="">
+    <a id="lightbox-action" class="lightbox-action" href="#">✏️ 이 문구로 카드 만들기</a>
+  </div>
 
   <footer>
     <p>morning-mom · <a href="https://github.com/baezzanglion/morning-mom-web" target="_blank" rel="noopener">스폰지클럽 3·4주차</a></p>
@@ -109,10 +122,11 @@ async function loadGallery(){
       document.getElementById('empty').hidden = false;
       return;
     }
-    grid.innerHTML = items.map(it=>{
+    const VALID_TONES = ['다정','위트','차분'];
+    grid.innerHTML = items.map((it,idx)=>{
       const preview = (it.preview||'').replace(/\|/g,'\n').replace(/\*\*/g,'');
       return `
-        <div class="item" data-src="${it.file}">
+        <div class="item" data-idx="${idx}">
           <img src="${it.file}" alt="${it.date}" loading="lazy">
           <div class="info">
             <div class="date">${it.date||''}</div>
@@ -125,13 +139,26 @@ async function loadGallery(){
     // 라이트박스
     const lb = document.getElementById('lightbox');
     const lbImg = document.getElementById('lightbox-img');
+    const lbAction = document.getElementById('lightbox-action');
     grid.querySelectorAll('.item').forEach(el=>{
       el.addEventListener('click',()=>{
-        lbImg.src = el.dataset.src;
+        const it = items[+el.dataset.idx];
+        lbImg.src = it.file;
+        // 톤 추정: tag 첫 단어가 유효 톤이면 사용, 아니면 기본 '다정'
+        const firstTag = (it.tag||'').split('·')[0].trim();
+        const tone = VALID_TONES.includes(firstTag) ? firstTag : '다정';
+        const msg = it.preview||'';
+        const url = `./?message=${encodeURIComponent(msg)}&tone=${encodeURIComponent(tone)}`;
+        lbAction.href = url;
         lb.classList.add('open');
       });
     });
-    lb.addEventListener('click',()=>lb.classList.remove('open'));
+    // 라이트박스 배경 클릭 → 닫기. 버튼 클릭은 이동.
+    lb.addEventListener('click',(e)=>{
+      if(e.target === lbAction) return; // 버튼은 그대로 이동
+      lb.classList.remove('open');
+    });
+    lbAction.addEventListener('click',(e)=>e.stopPropagation());
   }catch(e){
     document.getElementById('count').textContent = '갤러리를 불러올 수 없어요: ' + e.message;
     document.getElementById('empty').hidden = false;
