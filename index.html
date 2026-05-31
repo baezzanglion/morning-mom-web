@@ -222,7 +222,7 @@
 
       <label for="message">메시지 (직접 입력 또는 위에서 선택)</label>
       <textarea id="message">사랑 받는 게|당연한 사람이 있어요.|**엄마, 당신이에요.**</textarea>
-      <small>의미단위 줄바꿈은 <code>|</code>, 강조할 한 줄은 <code>**...**</code></small>
+      <small>의미단위 줄바꿈 <code>|</code> · 굵게 <code>**...**</code> · 작은 글씨 <code>~~...~~</code> (인용·출처용)</small>
 
       <label>폰트</label>
       <fieldset class="font-grid">
@@ -319,9 +319,11 @@ let uploadedPhoto=null;
 function parseChunks(msg){
   const raw=msg.replace(/\|/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
   return raw.map(c=>{
+    const sm=c.match(/^~~(.+)~~$/);
+    if(sm) return {text:sm[1].trim(),bold:false,small:true};
     const m=c.match(/^\*\*(.+)\*\*$/);
-    if(m) return {text:m[1].trim(),bold:true};
-    return {text:c,bold:false};
+    if(m) return {text:m[1].trim(),bold:true,small:false};
+    return {text:c,bold:false,small:false};
   });
 }
 
@@ -418,17 +420,25 @@ function drawCard(){
 
   // 본문
   ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=colors.fg;
-  const baseSize=isPolaroid? Math.floor(preset.size*0.78) : preset.size;
+  let baseSize=isPolaroid? Math.floor(preset.size*0.78) : preset.size;
   const chunks=parseChunks(message);
+
+  // 길이/줄 수 기반 자동 축소 — 본문이 카드 밖으로 밀리는 것 방지
+  const totalChars=chunks.reduce((s,c)=>s+c.text.length,0);
+  if(totalChars>40) baseSize=Math.floor(baseSize*0.88);
+  if(totalChars>70 || chunks.length>=5) baseSize=Math.floor(baseSize*0.85);
+
+  // chunk별 wrap + line height (small chunk는 60% 크기·작은 line height)
+  const smallRatio=0.55;
   const renderLines=[];
-  for(const {text,bold} of chunks){
-    ctx.font=`${bold?'700':'400'} ${baseSize}px ${preset.family}`;
+  for(const {text,bold,small} of chunks){
+    const size=small? Math.floor(baseSize*smallRatio) : baseSize;
+    ctx.font=`${bold?'700':'400'} ${size}px ${preset.family}`;
     for(const line of wrap(ctx,text,W-200)){
-      renderLines.push({text:line,bold});
+      renderLines.push({text:line,bold,small,size});
     }
   }
-  const lineH=Math.floor(baseSize*preset.line);
-  const totalH=lineH*renderLines.length;
+  const totalH=renderLines.reduce((s,l)=>s+Math.floor(l.size*preset.line),0);
   let y;
   if(bodyTopOverride!=null){
     const availH=H-bodyTopOverride-100;
@@ -436,10 +446,10 @@ function drawCard(){
   } else {
     y=Math.floor((H-totalH)/2)-30;
   }
-  for(const {text,bold} of renderLines){
-    ctx.font=`${bold?'700':'400'} ${baseSize}px ${preset.family}`;
+  for(const {text,bold,size} of renderLines){
+    ctx.font=`${bold?'700':'400'} ${size}px ${preset.family}`;
     ctx.fillText(text,W/2,y);
-    y+=lineH;
+    y+=Math.floor(size*preset.line);
   }
 
   // 푸터
@@ -620,8 +630,9 @@ function renderSuggestions(arr){
     const display=(it.message||'').replace(/\|/g,'\n');
     const escMsg=(it.message||'').replace(/"/g,'&quot;');
     const scripture=(it.scripture||'').trim();
+    // 성경 구절은 ~~...~~로 감싸 작은 글씨로 렌더 (카드 밖으로 밀림 방지)
     const escMsgWithScripture=scripture
-      ? ((it.message||'')+'|'+scripture).replace(/"/g,'&quot;')
+      ? ((it.message||'')+'|~~'+scripture+'~~').replace(/"/g,'&quot;')
       : escMsg;
     const scriptureBlock=scripture
       ? `<div style="margin-top:8px;padding:8px 10px;background:#fff8e8;border-left:3px solid #d9b06b;border-radius:4px;font-size:13px;color:#7a5a2a;line-height:1.5">✝️ ${scripture.replace(/</g,'&lt;')}</div>`
