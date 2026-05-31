@@ -585,7 +585,14 @@ function renderSuggestions(arr){
   document.getElementById(id).addEventListener('input',drawCard);
 });
 document.querySelectorAll('input[name="font"]').forEach(r=>{
-  r.addEventListener('change',drawCard);
+  r.addEventListener('change',async ()=>{
+    const fontKey=document.querySelector('input[name="font"]:checked').value;
+    const preset=PRESETS[fontKey];
+    // 폰트 가족명 추출 (예: "'Nanum Pen Script',cursive" → "Nanum Pen Script")
+    const family=preset.family.split(',')[0].replace(/'/g,'').trim();
+    await document.fonts.load(`${preset.size}px '${family}'`).catch(()=>{});
+    drawCard();
+  });
 });
 
 // 테마/커스텀 모드 토글
@@ -675,10 +682,23 @@ document.getElementById('photo-upload').addEventListener('change',async(e)=>{
   }
 })();
 
-// 폰트 로드 후 초기 렌더
-document.fonts.ready.then(drawCard);
-// 폰트가 늦게 로드돼도 일단 그려둠
+// 폰트 명시적 preload — canvas는 CSS 사용 추적이 안 되므로
+// document.fonts.ready만으로는 lazy-load 폰트가 첫 그림 시 fallback될 수 있음
+async function preloadFonts(){
+  const specs=[
+    "400 102px Gaegu","700 102px Gaegu",
+    "400 72px 'Gowun Batang'","700 72px 'Gowun Batang'",
+    "400 120px 'Nanum Pen Script'",
+    "400 115px 'Nanum Brush Script'",
+    "400 95px 'Hi Melody'",
+  ];
+  await Promise.all(specs.map(s=>document.fonts.load(s).catch(()=>{})));
+}
+
+// 초기 렌더: preload 완료 후 한 번 더 그림 (이미 setTimeout으로 fallback도 보장)
+preloadFonts().then(drawCard);
 setTimeout(drawCard,100);
+setTimeout(drawCard,800);  // 폰트 다운로드 늦을 때 fallback
 </script>
 </body>
 </html>
