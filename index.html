@@ -197,6 +197,25 @@
         <option value="차분">차분 (담백한 무게감)</option>
       </select>
 
+      <label for="relationship">관계</label>
+      <select id="relationship">
+        <option value="가족">가족 (기본)</option>
+        <option value="친한 친구">친한 친구 (오글거림 ↓, 위트 ↑)</option>
+        <option value="직장 동료">직장 동료 (정중·가볍게)</option>
+        <option value="지인">지인 (중립)</option>
+      </select>
+
+      <label for="gender">받는 사람 성별 <span style="color:var(--muted);font-weight:400">(선택)</span></label>
+      <select id="gender">
+        <option value="미지정">미지정</option>
+        <option value="여성">여성</option>
+        <option value="남성">남성</option>
+      </select>
+
+      <label class="toggle" style="margin-top:14px;font-size:13px">
+        <input type="checkbox" id="include-scripture"> ✝️ 어울리는 성경 구절 함께 제안 (받는 사람이 종교적일 때)
+      </label>
+
       <button id="suggest">✨ AI 후보 3개 제안받기</button>
       <div class="status" id="suggest-status"></div>
       <div id="suggestions" hidden></div>
@@ -501,11 +520,37 @@ async function callClaude(systemPrompt,userPrompt,key){
   return data.content[0].text;
 }
 
-function buildSystem(recipient,profile,tone){
+function buildSystem(recipient,profile,tone,relationship,gender,includeScripture){
+  const relationshipGuide={
+    "가족":"따뜻하고 다정. 호칭 자연스럽게 (엄마/아빠/형/누나 등)",
+    "친한 친구":"친구 별명·반말 자연스럽게. **너무 \"오글오글\"하지 않게** — 위트나 가벼운 감동·관찰 결로. 직접적인 사랑 표현보다 *옆에 있는 자국*을 그리듯이",
+    "직장 동료":"정중하지만 가볍게. 사적 침범 금지. 일상의 작은 응원이나 관찰 결",
+    "지인":"중립적·담백. 거리감 유지하면서도 따뜻함",
+  }[relationship]||"";
+
+  const examplesByRelationship={
+    "가족":`- 사랑 받는 게|당연한 사람이 있어요.|**엄마, 당신이에요.**
+- 오늘 백합 한 송이 같은|하루 보내시길.|**단단하고 환하게.**
+- 어떤 날엔|그저 엄마라는 존재만으로도|충분해요.`,
+    "친한 친구":`- 너 오늘|좋은 일 하나만|더 있어라.
+- 평범한 하루도|너랑 있으면|괜찮은 하루가 돼.
+- 별일 없는 게|제일 별일이지.|**그래서 좋아.**`,
+    "직장 동료":`- 한 주의 끝자락|작은 여유 한 잔.|애쓰셨습니다.
+- 오늘 책상 위에|좋은 소식 하나.|조용히 응원합니다.
+- 바쁜 하루 속|짧은 호흡 한 번.`,
+    "지인":`- 오늘 하루|작게라도 환한 일.
+- 잘 지내시기를.|그 한 마디로 충분한 날.`,
+  }[relationship]||"";
+
   return `너는 사용자가 ${recipient}에게 보낼 따뜻한 카드 메시지를 만드는 도구다.
 
 [받는 사람 정보]
 ${profile||'(정보 없음 — 일반적이고 따뜻한 표현으로)'}
+
+[관계]
+- 종류: ${relationship}
+- 성별: ${gender}
+- 결: ${relationshipGuide}
 
 [양식 규칙 — 반드시 따름]
 - 카드 한 장에 2~3줄
@@ -513,6 +558,7 @@ ${profile||'(정보 없음 — 일반적이고 따뜻한 표현으로)'}
 - 의미단위 줄바꿈은 \`|\`로 표시
 - 강조할 한 줄은 \`**...**\`으로 감싼다 (보통 마지막 호명/핵심 한 줄, 카드당 최대 1줄)
 - 톤: ${tone}
+- 호칭·결은 [관계]에 맞게 조정
 
 [금기]
 - "화이팅", "파이팅", "오늘도 힘내세요" 같은 흔한 응원
@@ -520,14 +566,16 @@ ${profile||'(정보 없음 — 일반적이고 따뜻한 표현으로)'}
 - 비교 칭찬 ("X처럼 훌륭한 사람 없어요")
 - 강한 종교적 단정
 - 받는 사람에게 부담스러운 직접 인용 ("어제 X라고 했잖아")
+- 친한 친구 관계인데 "당신은 소중한 사람" 류의 *오글거림* 표현
 
-[좋은 예시]
-- 사랑 받는 게|당연한 사람이 있어요.|**엄마, 당신이에요.**
-- 오늘 백합 한 송이 같은|하루 보내시길.|**단단하고 환하게.**
-- 어떤 날엔|그저 엄마라는 존재만으로도|충분해요.
+[좋은 예시 — ${relationship}]
+${examplesByRelationship}
 
 서로 결이 다른 후보 **3개**를 다음 JSON 배열로 반환:
-[{"message":"..."},{"message":"..."},{"message":"..."}]
+${includeScripture
+  ? `[{"message":"...","scripture":"..."},{"message":"...","scripture":"..."},{"message":"...","scripture":"..."}]
+- scripture: 메시지 결과 어울리는 한국어 개역개정 성경 구절 한 줄 인용 + 출처(예: "수고하고 무거운 짐 진 자들아 다 내게로 오라 (마태복음 11:28)"). 받는 사람이 종교적 컨텍스트일 때만 의미. 정확한 구절만 인용.`
+  : `[{"message":"..."},{"message":"..."},{"message":"..."}]`}
 
 JSON만 출력. 설명 금지.`;
 }
@@ -542,13 +590,16 @@ document.getElementById('suggest').addEventListener('click',async()=>{
   const profile=document.getElementById('profile').value.trim();
   const hint=document.getElementById('hint').value.trim();
   const tone=document.getElementById('tone').value;
+  const relationship=document.getElementById('relationship').value;
+  const gender=document.getElementById('gender').value;
+  const includeScripture=document.getElementById('include-scripture').checked;
 
   const btn=document.getElementById('suggest');
   btn.disabled=true;btn.textContent='생성 중...';
   flashStatus('suggest-status','Claude에게 묻는 중...');
 
   try{
-    const system=buildSystem(recipient,profile,tone);
+    const system=buildSystem(recipient,profile,tone,relationship,gender,includeScripture);
     const user=hint?`오늘 단서: ${hint}\n위 양식 그대로 후보 3개 JSON으로.`:`오늘 카드 후보 3개를 JSON으로.`;
     const text=await callClaude(system,user,key);
     const match=text.match(/\[[\s\S]*\]/);
@@ -567,8 +618,18 @@ function renderSuggestions(arr){
   const div=document.getElementById('suggestions');
   div.innerHTML='<h3>후보 3개</h3>'+arr.map((it,i)=>{
     const display=(it.message||'').replace(/\|/g,'\n');
-    const esc=(it.message||'').replace(/"/g,'&quot;');
-    return `<div class="sugg"><pre>${display}</pre><button data-msg="${esc}">이 메시지로 선택</button></div>`;
+    const escMsg=(it.message||'').replace(/"/g,'&quot;');
+    const scripture=(it.scripture||'').trim();
+    const escMsgWithScripture=scripture
+      ? ((it.message||'')+'|'+scripture).replace(/"/g,'&quot;')
+      : escMsg;
+    const scriptureBlock=scripture
+      ? `<div style="margin-top:8px;padding:8px 10px;background:#fff8e8;border-left:3px solid #d9b06b;border-radius:4px;font-size:13px;color:#7a5a2a;line-height:1.5">✝️ ${scripture.replace(/</g,'&lt;')}</div>`
+      : '';
+    const scriptureBtn=scripture
+      ? `<button data-msg="${escMsgWithScripture}" class="ghost" style="margin-left:6px">+ 성경 구절 포함해 선택</button>`
+      : '';
+    return `<div class="sugg"><pre>${display}</pre>${scriptureBlock}<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"><button data-msg="${escMsg}">이 메시지로 선택</button>${scriptureBtn}</div></div>`;
   }).join('');
   div.hidden=false;
   div.querySelectorAll('button[data-msg]').forEach(b=>{
