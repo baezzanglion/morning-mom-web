@@ -107,12 +107,15 @@
     color:var(--accent-h);text-decoration:none;font-size:13px;
   }
   .gallery-cta:hover{background:#f5ebdf}
-  .penpal-banner{
-    display:inline-block;margin-top:10px;padding:6px 14px;
-    background:#f3eef9;border:1px solid #d9caf0;border-radius:999px;
-    color:#6a4fa3;font-size:13px;
+  .penpal-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:14px;margin-left:8px;padding:10px 18px;
+    background:#f3eef9;border:1px solid #a890d4;
+    border-radius:999px;color:#6a4fa3;
+    font-size:14px;font-weight:600;text-decoration:none;
+    transition:.15s;
   }
-  .penpal-banner strong{color:#4d2f8b}
+  .penpal-btn:hover{background:#a890d4;color:#fff}
   .from-gallery{
     margin-bottom:18px;padding:10px 14px;
     background:#fdf4e8;border:1px solid #e8d4b8;
@@ -169,6 +172,18 @@
 </style>
 </head>
 <body>
+<!-- 폰트 글리프 강제 preloader — canvas는 fonts.ready 추적 사각지대라
+     hidden 한국어 글리프를 실제로 그려서 브라우저가 폰트를 실로드하게 함 -->
+<div aria-hidden="true" style="position:absolute;visibility:hidden;height:0;overflow:hidden;left:-9999px;top:-9999px">
+  <span style="font-family:'Gaegu',cursive;font-weight:400">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Gaegu',cursive;font-weight:700">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Gowun Batang',serif;font-weight:400">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Gowun Batang',serif;font-weight:700">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Nanum Pen Script',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Nanum Brush Script',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Hi Melody',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
+</div>
+
 <div class="container">
 
   <header>
@@ -177,9 +192,9 @@
     <a href="gallery.html" class="gallery-btn" id="gallery-btn">
       <span>📷</span><span>갤러리</span><span id="gallery-count" style="opacity:.7"></span>
     </a>
-    <div class="penpal-banner" id="penpal-banner">
-      📮 이번 주 펜팔 주제: <strong>그리운 사람</strong> · 익명으로 한 줄 부치기
-    </div>
+    <a href="pen-pal.html" class="penpal-btn" id="penpal-btn">
+      <span>📮</span><span>펜팔</span>
+    </a>
   </header>
 
   <div class="layout">
@@ -693,10 +708,16 @@ document.querySelectorAll('input[name="font"]').forEach(r=>{
   r.addEventListener('change',async ()=>{
     const fontKey=document.querySelector('input[name="font"]:checked').value;
     const preset=PRESETS[fontKey];
-    // 폰트 가족명 추출 (예: "'Nanum Pen Script',cursive" → "Nanum Pen Script")
     const family=preset.family.split(',')[0].replace(/'/g,'').trim();
-    await document.fonts.load(`${preset.size}px '${family}'`).catch(()=>{});
+    // 본문·강조·작은(~~)·푸터 등 사용될 모든 size로 미리 load (글리프 캐시 강제)
+    const sizes=[preset.size, Math.floor(preset.size*0.88), Math.floor(preset.size*0.78), Math.floor(preset.size*0.55), preset.foot];
+    await Promise.all([
+      ...sizes.map(s=>document.fonts.load(`400 ${s}px '${family}'`).catch(()=>{})),
+      document.fonts.load(`700 ${preset.size}px '${family}'`).catch(()=>{}),
+    ]);
     drawCard();
+    // 한 번 더 안전망 (브라우저 렌더 사이클이 폰트 swap을 반영하는 데 시간이 걸리는 케이스)
+    setTimeout(drawCard,80);
   });
 });
 
@@ -723,18 +744,29 @@ document.getElementById('polaroid-mode').addEventListener('change',drawCard);
 document.getElementById('upload-btn').addEventListener('click',()=>{
   document.getElementById('photo-upload').click();
 });
-// 펜팔 부치기 (데모 — 실제 백엔드 없이 토스트만)
+// 펜팔 부치기 (현재 단계: LocalStorage에 본인 부친 편지 기록 + 펜팔 페이지에서 확인)
+// 다음 단계: Firebase·Supabase 등 실제 백엔드 연결 시 다른 사람도 볼 수 있게 확장 예정.
+const PENPAL_NICKS = ['새벽','노을','구름','이슬','바람','풀잎','조약돌','파도'];
 document.getElementById('penpal-send').addEventListener('click',()=>{
   const msg=document.getElementById('message').value.trim();
   if(!msg){
     flashStatus('penpal-status','메시지를 먼저 작성하세요',true);
     return;
   }
-  // LocalStorage에 부친 흔적만 기록 (데모용)
+  // 카드 PNG도 함께 보존 (Base64 dataURL)
+  const canvas=document.getElementById('card');
+  const dataUrl=canvas.toDataURL('image/png');
   const sent=JSON.parse(localStorage.getItem('morning-mom-penpal-sent')||'[]');
-  sent.push({msg,date:new Date().toISOString().slice(0,10),topic:'그리운 사람'});
+  const nick=PENPAL_NICKS[Math.floor(Math.random()*PENPAL_NICKS.length)];
+  sent.push({
+    msg,
+    nick,
+    date:new Date().toISOString().slice(0,10),
+    topic:'그리운 사람',
+    dataUrl,
+  });
   localStorage.setItem('morning-mom-penpal-sent',JSON.stringify(sent));
-  flashStatus('penpal-status','📮 별빛 펜팔 사서함으로 익명 부치기 완료! (데모) 다음 주 갤러리에서 만나요');
+  flashStatus('penpal-status',`📮 익명 '${nick}'으로 사서함에 부쳤어요. 펜팔 페이지에서 확인하세요 →`);
 });
 
 document.getElementById('photo-upload').addEventListener('change',async(e)=>{
