@@ -189,6 +189,7 @@
 
       <label for="hint">오늘의 단서 <span style="color:var(--muted);font-weight:400">(선택)</span></label>
       <textarea id="hint" placeholder="예: 오늘 날씨 더움, 건강에 대한 걱정"></textarea>
+      <small id="weather-hint" style="color:var(--accent-h)">🌤️ 오늘 서울 날씨가 AI 제안에 자동 반영됩니다</small>
 
       <label for="tone">톤</label>
       <select id="tone">
@@ -510,6 +511,21 @@ document.getElementById('clear-key').addEventListener('click',()=>{
   alert('지웠어요.');
 });
 
+// ── 외부 정보: 날씨 (모닝라이언 wttr.in 패턴 재활용) ─
+// 30분 캐시로 호출 최소화. CORS 허용된 무료 API. 실패 시 silent fallback.
+let _weatherCache=null,_weatherCachedAt=0;
+async function getWeather(city='Seoul'){
+  if(_weatherCache && Date.now()-_weatherCachedAt < 30*60*1000) return _weatherCache;
+  try{
+    const res=await fetch(`https://wttr.in/${city}?format=%C+%t`);
+    if(!res.ok) return null;
+    const text=(await res.text()).trim();
+    if(!text || text.length>80) return null;
+    _weatherCache=text; _weatherCachedAt=Date.now();
+    return text;
+  }catch(e){ return null; }
+}
+
 // ── AI 후보 제안 (Anthropic API 직접 호출) ─
 async function callClaude(systemPrompt,userPrompt,key){
   const res=await fetch('https://api.anthropic.com/v1/messages',{
@@ -612,7 +628,10 @@ document.getElementById('suggest').addEventListener('click',async()=>{
 
   try{
     const system=buildSystem(recipient,profile,tone,relationship,gender,includeScripture);
-    const user=hint?`오늘 단서: ${hint}\n위 양식 그대로 후보 3개 JSON으로.`:`오늘 카드 후보 3개를 JSON으로.`;
+    // 날씨 외부 정보 자동 주입 (모닝라이언 wttr.in 패턴) — 실패해도 진행
+    const weather=await getWeather();
+    const weatherLine=weather?`[오늘 외부 정보]\n현재 서울 날씨: ${weather}\n메시지에 자연스럽게 녹여도 좋고, 어울리지 않으면 무시.\n\n`:'';
+    const user=`${weatherLine}${hint?`오늘 단서: ${hint}\n`:''}위 양식 그대로 후보 3개 JSON으로.`;
     const text=await callClaude(system,user,key);
     const match=text.match(/\[[\s\S]*\]/);
     if(!match) throw new Error('JSON을 찾지 못함: '+text.slice(0,200));
@@ -720,6 +739,59 @@ document.getElementById('photo-upload').addEventListener('change',async(e)=>{
       status.textContent='이미지 로드 실패: '+err.message;
     }
   }
+});
+
+// ── 날씨 미리 fetch + UI 갱신 ─────────────
+(async()=>{
+  const w=await getWeather();
+  const el=document.getElementById('weather-hint');
+  if(el && w) el.textContent=`🌤️ 오늘 서울: ${w} — AI 제안에 자동 반영`;
+})();
+
+// ── 수신자 프로필 LocalStorage 저장 ─────────
+// 매번 다시 입력하는 불편 해소. 받는 사람·프로필·관계·성별·톤·폰트·테마까지 함께 보존.
+const PROFILE_KEY='morning-mom-recipient-profile';
+function saveProfile(){
+  const data={
+    recipient: document.getElementById('recipient').value,
+    profile: document.getElementById('profile').value,
+    tone: document.getElementById('tone').value,
+    relationship: document.getElementById('relationship').value,
+    gender: document.getElementById('gender').value,
+    font: document.querySelector('input[name="font"]:checked')?.value,
+    theme: document.querySelector('input[name="theme"]:checked')?.value,
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+}
+function loadProfile(){
+  try{
+    const raw=localStorage.getItem(PROFILE_KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.recipient!==undefined) document.getElementById('recipient').value=d.recipient;
+    if(d.profile!==undefined) document.getElementById('profile').value=d.profile;
+    if(d.tone) document.getElementById('tone').value=d.tone;
+    if(d.relationship) document.getElementById('relationship').value=d.relationship;
+    if(d.gender) document.getElementById('gender').value=d.gender;
+    if(d.font){
+      const r=document.querySelector(`input[name="font"][value="${d.font}"]`);
+      if(r) r.checked=true;
+    }
+    if(d.theme){
+      const r=document.querySelector(`input[name="theme"][value="${d.theme}"]`);
+      if(r) r.checked=true;
+    }
+  }catch(e){/* 무시 */}
+}
+// 페이지 로드 시 복원
+loadProfile();
+// 주요 input 변경 시 자동 저장
+['recipient','profile','tone','relationship','gender'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',saveProfile);
+  document.getElementById(id).addEventListener('input',saveProfile);
+});
+document.querySelectorAll('input[name="font"], input[name="theme"]').forEach(r=>{
+  r.addEventListener('change',saveProfile);
 });
 
 // ── 갤러리 카드 수 표시 ─────────────────
