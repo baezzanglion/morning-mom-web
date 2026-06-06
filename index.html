@@ -814,6 +814,7 @@ stopBtn.addEventListener('click',()=>{
 // 카드 canvas + 보이스 Blob → 비디오로 합성 (카톡 자동재생용)
 async function makeCardVoiceVideo(canvas, voiceBlob){
   // 1. 카드를 비디오 스트림으로
+  // 주의: 정적 canvas는 captureStream이 프레임을 송출 안 함 → 녹화 중 강제 redraw 필요
   const videoStream=canvas.captureStream(30);
   // 2. 보이스 Blob → AudioContext로 디코드 → 스트림
   const ac=new (window.AudioContext||window.webkitAudioContext)();
@@ -828,36 +829,51 @@ async function makeCardVoiceVideo(canvas, voiceBlob){
     ...videoStream.getVideoTracks(),
     ...audioDest.stream.getAudioTracks(),
   ]);
-  // 4. MediaRecorder — mp4 우선(카톡 호환 최고), 안 되면 webm
+  // 4. MediaRecorder — webm(vp8+opus)이 가장 안정. mp4는 브라우저별 인코더 다름.
+  // 카톡 호환은 다음 단계에서 별도 처리 (mp4 H.264 진짜 인코딩은 FFmpeg.wasm 필요).
   const candidates=[
-    'video/mp4;codecs=h264,aac',
-    'video/mp4',
+    'video/webm;codecs=vp9,opus',
     'video/webm;codecs=vp8,opus',
     'video/webm',
+    'video/mp4',
   ];
   const mime=candidates.find(m=>MediaRecorder.isTypeSupported(m))||'';
   const ext=mime.includes('mp4')?'mp4':'webm';
   const rec=new MediaRecorder(combined, mime?{mimeType:mime}:{});
   const chunks=[];
   rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+
+  // 정적 canvas redraw 트리거 — 100ms마다 drawCard 호출해 captureStream에 프레임 송출
+  let frameTimer=null;
+  const startFrames=()=>{
+    frameTimer=setInterval(()=>{
+      try{ drawCard(); }catch(e){}
+    },100);
+  };
+  const stopFrames=()=>{
+    if(frameTimer){clearInterval(frameTimer); frameTimer=null;}
+  };
+
   return new Promise((resolve,reject)=>{
     let stopped=false;
     const stopOnce=()=>{
       if(stopped)return; stopped=true;
+      stopFrames();
       if(rec.state==='recording'){rec.stop();}
     };
     rec.onstop=()=>{
       const blob=new Blob(chunks,{type:mime||'video/webm'});
       resolve({blob,ext,duration:audioBuffer.duration});
     };
-    rec.onerror=e=>reject(e);
+    rec.onerror=e=>{stopFrames(); reject(e);};
     audioSource.onended=()=>{
-      // 보이스 끝난 후 200ms 여유 두고 stop (마지막 프레임 보장)
-      setTimeout(stopOnce,200);
+      // 보이스 끝난 후 300ms 여유 두고 stop (마지막 프레임 보장)
+      setTimeout(stopOnce,300);
     };
-    // 안전망: max 60초
-    setTimeout(stopOnce,(audioBuffer.duration+1)*1000+500);
-    rec.start();
+    // 안전망: max 보이스 길이 + 1.5초
+    setTimeout(stopOnce,(audioBuffer.duration+1.5)*1000);
+    rec.start(100); // 100ms timeslice — 더 자주 chunk 송출
+    startFrames();
     audioSource.start();
   });
 }
