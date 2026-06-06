@@ -161,6 +161,9 @@
   .polaroid-row{
     display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;
   }
+  .voice-row{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;
+  }
   .toggle{
     display:flex;align-items:center;gap:6px;margin:0;font-size:14px;cursor:pointer;
   }
@@ -294,6 +297,15 @@
 
       <button id="penpal-send" class="ghost" style="margin-top:10px;width:100%">📮 펜팔에 익명으로 부치기 (이번 주 주제: 그리운 사람)</button>
       <div class="status" id="penpal-status"></div>
+
+      <label style="margin-top:24px">🎙️ 보이스 녹음 <span style="color:var(--muted);font-weight:400">(선택 — 카드와 함께 카톡에 보내요)</span></label>
+      <div class="voice-row">
+        <button id="voice-rec" type="button" class="ghost" style="margin-top:0;padding:8px 14px;font-size:13px">🔴 녹음 시작</button>
+        <button id="voice-stop" type="button" class="ghost" style="margin-top:0;padding:8px 14px;font-size:13px;display:none">⏹ 중지</button>
+        <span id="voice-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+      <audio id="voice-preview" controls style="width:100%;margin-top:8px;display:none"></audio>
+      <button id="voice-download" type="button" class="ghost" style="margin-top:8px;display:none">📥 카드 + 보이스 함께 다운로드</button>
 
       <details>
         <summary>🔐 AI 호출용 API key 설정 (선택)</summary>
@@ -744,6 +756,83 @@ document.getElementById('polaroid-mode').addEventListener('change',drawCard);
 document.getElementById('upload-btn').addEventListener('click',()=>{
   document.getElementById('photo-upload').click();
 });
+// ── 보이스 녹음 (MediaRecorder API) ─────
+// 카드와 함께 본인 목소리로 메시지를 녹음. 다운로드 시 PNG + audio 같이.
+let _mediaRecorder=null;
+let _voiceChunks=[];
+let _voiceBlob=null;
+let _voiceUrl=null;
+let _voiceMime='audio/webm';
+let _voiceExt='webm';
+const recBtn=document.getElementById('voice-rec');
+const stopBtn=document.getElementById('voice-stop');
+const voicePreview=document.getElementById('voice-preview');
+const voiceStatus=document.getElementById('voice-status');
+const voiceDownload=document.getElementById('voice-download');
+
+recBtn.addEventListener('click',async()=>{
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    // 브라우저 호환성 — Safari는 mp4, Chrome/Firefox는 webm
+    const candidates=['audio/webm;codecs=opus','audio/webm','audio/mp4'];
+    _voiceMime=candidates.find(m=>MediaRecorder.isTypeSupported(m))||'';
+    _voiceExt=_voiceMime.includes('mp4')?'m4a':'webm';
+    _voiceChunks=[];
+    _mediaRecorder=_voiceMime
+      ? new MediaRecorder(stream,{mimeType:_voiceMime})
+      : new MediaRecorder(stream);
+    _mediaRecorder.ondataavailable=(e)=>{if(e.data.size>0)_voiceChunks.push(e.data)};
+    _mediaRecorder.onstop=()=>{
+      _voiceBlob=new Blob(_voiceChunks,{type:_voiceMime||'audio/webm'});
+      if(_voiceUrl)URL.revokeObjectURL(_voiceUrl);
+      _voiceUrl=URL.createObjectURL(_voiceBlob);
+      voicePreview.src=_voiceUrl;
+      voicePreview.style.display='block';
+      voiceDownload.style.display='inline-block';
+      voiceStatus.textContent=`✓ 녹음 완료 (${Math.round(_voiceBlob.size/1024)}KB)`;
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    _mediaRecorder.start();
+    recBtn.style.display='none';
+    stopBtn.style.display='inline-block';
+    voiceStatus.textContent='🔴 녹음 중... 메시지를 천천히 읽어주세요';
+  }catch(err){
+    voiceStatus.textContent='마이크 권한이 필요해요: '+err.message;
+    voiceStatus.style.color='#b85a3f';
+  }
+});
+
+stopBtn.addEventListener('click',()=>{
+  if(_mediaRecorder && _mediaRecorder.state==='recording'){
+    _mediaRecorder.stop();
+  }
+  stopBtn.style.display='none';
+  recBtn.style.display='inline-block';
+  recBtn.textContent='🔁 다시 녹음';
+});
+
+voiceDownload.addEventListener('click',()=>{
+  const recipient=document.getElementById('recipient').value.trim()||'card';
+  const today=new Date().toISOString().slice(0,10);
+  // 1) PNG 다운로드
+  document.getElementById('card').toBlob(blob=>{
+    const a=document.createElement('a');
+    const url=URL.createObjectURL(blob);
+    a.href=url; a.download=`${recipient}-${today}.png`; a.click();
+    URL.revokeObjectURL(url);
+    // 2) 보이스 다운로드 (살짝 딜레이)
+    setTimeout(()=>{
+      if(_voiceBlob){
+        const aa=document.createElement('a');
+        const vu=URL.createObjectURL(_voiceBlob);
+        aa.href=vu; aa.download=`${recipient}-${today}.${_voiceExt}`; aa.click();
+        URL.revokeObjectURL(vu);
+        flashStatus('action-status','✓ 카드 + 보이스 둘 다 다운로드 — 카톡에 함께 보내세요');
+      }
+    },300);
+  });
+});
+
 // 펜팔 부치기 (현재 단계: LocalStorage에 본인 부친 편지 기록 + 펜팔 페이지에서 확인)
 // 다음 단계: Firebase·Supabase 등 실제 백엔드 연결 시 다른 사람도 볼 수 있게 확장 예정.
 const PENPAL_NICKS = ['새벽','노을','구름','이슬','바람','풀잎','조약돌','파도'];
