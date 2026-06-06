@@ -305,7 +305,7 @@
         <span id="voice-status" style="font-size:12px;color:var(--muted)"></span>
       </div>
       <audio id="voice-preview" controls style="width:100%;margin-top:8px;display:none"></audio>
-      <button id="voice-download" type="button" class="ghost" style="margin-top:8px;display:none">📥 카드 + 보이스 함께 다운로드</button>
+      <button id="voice-download" type="button" class="ghost" style="margin-top:8px;display:none">🎬 카드 + 보이스 비디오 다운로드 (카톡 자동재생)</button>
 
       <details>
         <summary>🔐 AI 호출용 API key 설정 (선택)</summary>
@@ -811,26 +811,84 @@ stopBtn.addEventListener('click',()=>{
   recBtn.textContent='🔁 다시 녹음';
 });
 
-voiceDownload.addEventListener('click',()=>{
+// 카드 canvas + 보이스 Blob → 비디오로 합성 (카톡 자동재생용)
+async function makeCardVoiceVideo(canvas, voiceBlob){
+  // 1. 카드를 비디오 스트림으로
+  const videoStream=canvas.captureStream(30);
+  // 2. 보이스 Blob → AudioContext로 디코드 → 스트림
+  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  const arrayBuffer=await voiceBlob.arrayBuffer();
+  const audioBuffer=await ac.decodeAudioData(arrayBuffer);
+  const audioSource=ac.createBufferSource();
+  audioSource.buffer=audioBuffer;
+  const audioDest=ac.createMediaStreamDestination();
+  audioSource.connect(audioDest);
+  // 3. 비디오 + 오디오 합쳐서 단일 스트림
+  const combined=new MediaStream([
+    ...videoStream.getVideoTracks(),
+    ...audioDest.stream.getAudioTracks(),
+  ]);
+  // 4. MediaRecorder — mp4 우선(카톡 호환 최고), 안 되면 webm
+  const candidates=[
+    'video/mp4;codecs=h264,aac',
+    'video/mp4',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+  ];
+  const mime=candidates.find(m=>MediaRecorder.isTypeSupported(m))||'';
+  const ext=mime.includes('mp4')?'mp4':'webm';
+  const rec=new MediaRecorder(combined, mime?{mimeType:mime}:{});
+  const chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+  return new Promise((resolve,reject)=>{
+    let stopped=false;
+    const stopOnce=()=>{
+      if(stopped)return; stopped=true;
+      if(rec.state==='recording'){rec.stop();}
+    };
+    rec.onstop=()=>{
+      const blob=new Blob(chunks,{type:mime||'video/webm'});
+      resolve({blob,ext,duration:audioBuffer.duration});
+    };
+    rec.onerror=e=>reject(e);
+    audioSource.onended=()=>{
+      // 보이스 끝난 후 200ms 여유 두고 stop (마지막 프레임 보장)
+      setTimeout(stopOnce,200);
+    };
+    // 안전망: max 60초
+    setTimeout(stopOnce,(audioBuffer.duration+1)*1000+500);
+    rec.start();
+    audioSource.start();
+  });
+}
+
+voiceDownload.addEventListener('click',async()=>{
+  if(!_voiceBlob){voiceStatus.textContent='먼저 녹음하세요';return;}
   const recipient=document.getElementById('recipient').value.trim()||'card';
   const today=new Date().toISOString().slice(0,10);
-  // 1) PNG 다운로드
-  document.getElementById('card').toBlob(blob=>{
+  const origText=voiceDownload.textContent;
+  voiceDownload.disabled=true;
+  voiceDownload.textContent='🎬 합성 중... (보이스 길이만큼 기다려 주세요)';
+  voiceStatus.textContent='카드와 보이스를 비디오로 합치는 중...';
+  try{
+    // canvas 최신 상태 보장
+    drawCard();
+    await new Promise(r=>setTimeout(r,100));
+    const canvas=document.getElementById('card');
+    const {blob,ext,duration}=await makeCardVoiceVideo(canvas,_voiceBlob);
     const a=document.createElement('a');
     const url=URL.createObjectURL(blob);
-    a.href=url; a.download=`${recipient}-${today}.png`; a.click();
-    URL.revokeObjectURL(url);
-    // 2) 보이스 다운로드 (살짝 딜레이)
-    setTimeout(()=>{
-      if(_voiceBlob){
-        const aa=document.createElement('a');
-        const vu=URL.createObjectURL(_voiceBlob);
-        aa.href=vu; aa.download=`${recipient}-${today}.${_voiceExt}`; aa.click();
-        URL.revokeObjectURL(vu);
-        flashStatus('action-status','✓ 카드 + 보이스 둘 다 다운로드 — 카톡에 함께 보내세요');
-      }
-    },300);
-  });
+    a.href=url; a.download=`${recipient}-${today}.${ext}`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    voiceStatus.textContent=`✓ 비디오 다운로드 (${Math.round(blob.size/1024)}KB, ${duration.toFixed(1)}초). 카톡에 보내면 자동 재생됩니다.`;
+    flashStatus('action-status','🎬 카드 + 보이스 비디오 다운로드 완료');
+  }catch(err){
+    voiceStatus.textContent='합성 실패: '+(err.message||err);
+    voiceStatus.style.color='#b85a3f';
+  }finally{
+    voiceDownload.disabled=false;
+    voiceDownload.textContent=origText;
+  }
 });
 
 // 펜팔 부치기 (현재 단계: LocalStorage에 본인 부친 편지 기록 + 펜팔 페이지에서 확인)
