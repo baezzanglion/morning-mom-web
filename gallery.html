@@ -98,6 +98,12 @@
   <div class="grid" id="grid"></div>
   <div class="empty" id="empty" hidden>아직 카드가 없어요. 첫 카드를 만들어보세요 →</div>
 
+  <section id="penpal-section" style="margin-top:64px" hidden>
+    <h2 style="font-family:'Gaegu',cursive;font-size:32px;color:var(--accent-h);text-align:center;margin-bottom:8px">📮 이번 주 펜팔 사서함</h2>
+    <p style="text-align:center;color:var(--muted);font-size:14px;margin-bottom:24px">주제: <strong>그리운 사람</strong> · 익명으로 보내는 한 줄 편지</p>
+    <div class="grid" id="penpal-grid"></div>
+  </section>
+
   <div class="lightbox" id="lightbox">
     <img id="lightbox-img" alt="">
     <a id="lightbox-action" class="lightbox-action" href="#">✏️ 이 문구로 카드 만들기</a>
@@ -114,15 +120,42 @@ async function loadGallery(){
   try{
     const res = await fetch('manifest.json?v=' + Date.now());
     if(!res.ok) throw new Error('manifest.json not found');
-    const items = await res.json();
+    const all = await res.json();
+    // 펜팔 카드(style: penpal) 분리
+    const penpal = all.filter(it=>it.style==='penpal');
+    const items = all.filter(it=>it.style!=='penpal');
     items.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
-    document.getElementById('count').textContent = `카드 ${items.length}장`;
+    penpal.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    document.getElementById('count').textContent = `카드 ${items.length}장 · 펜팔 ${penpal.length}장`;
     const grid = document.getElementById('grid');
     if(items.length===0){
       document.getElementById('empty').hidden = false;
-      return;
     }
     const VALID_TONES = ['다정','위트','차분'];
+    // 펜팔 섹션 렌더
+    if(penpal.length>0){
+      document.getElementById('penpal-section').hidden = false;
+      document.getElementById('penpal-grid').innerHTML = penpal.map((it,idx)=>{
+        const preview = (it.preview||'').replace(/\|/g,'\n').replace(/\*\*/g,'');
+        return `<div class="item" data-penpal-idx="${idx}">
+          <img src="${it.file}" alt="${it.date}" loading="lazy">
+          <div class="info">
+            <div class="date">${it.date||''}</div>
+            <div class="tag">${it.tag||''}</div>
+            ${preview?`<div class="preview">${escapeHtml(preview)}</div>`:''}
+          </div>
+        </div>`;
+      }).join('');
+      // 펜팔 카드 클릭 → 라이트박스 (이미지만, 카드 만들기 버튼 없음)
+      document.querySelectorAll('#penpal-grid .item').forEach(el=>{
+        el.addEventListener('click',()=>{
+          const it=penpal[+el.dataset.penpalIdx];
+          document.getElementById('lightbox-img').src=it.file;
+          document.getElementById('lightbox-action').style.display='none';
+          document.getElementById('lightbox').classList.add('open');
+        });
+      });
+    }
     grid.innerHTML = items.map((it,idx)=>{
       const preview = (it.preview||'').replace(/\|/g,'\n').replace(/\*\*/g,'');
       return `

@@ -107,6 +107,12 @@
     color:var(--accent-h);text-decoration:none;font-size:13px;
   }
   .gallery-cta:hover{background:#f5ebdf}
+  .penpal-banner{
+    display:inline-block;margin-top:10px;padding:6px 14px;
+    background:#f3eef9;border:1px solid #d9caf0;border-radius:999px;
+    color:#6a4fa3;font-size:13px;
+  }
+  .penpal-banner strong{color:#4d2f8b}
   .from-gallery{
     margin-bottom:18px;padding:10px 14px;
     background:#fdf4e8;border:1px solid #e8d4b8;
@@ -171,6 +177,9 @@
     <a href="gallery.html" class="gallery-btn" id="gallery-btn">
       <span>📷</span><span>갤러리</span><span id="gallery-count" style="opacity:.7"></span>
     </a>
+    <div class="penpal-banner" id="penpal-banner">
+      📮 이번 주 펜팔 주제: <strong>그리운 사람</strong> · 익명으로 한 줄 부치기
+    </div>
   </header>
 
   <div class="layout">
@@ -267,6 +276,9 @@
       <div class="status" id="action-status"></div>
 
       <a href="gallery.html" class="gallery-cta">💌 다른 분들이 보낸 카드 둘러보기 →</a>
+
+      <button id="penpal-send" class="ghost" style="margin-top:10px;width:100%">📮 펜팔에 익명으로 부치기 (이번 주 주제: 그리운 사람)</button>
+      <div class="status" id="penpal-status"></div>
 
       <details>
         <summary>🔐 AI 호출용 API key 설정 (선택)</summary>
@@ -711,6 +723,20 @@ document.getElementById('polaroid-mode').addEventListener('change',drawCard);
 document.getElementById('upload-btn').addEventListener('click',()=>{
   document.getElementById('photo-upload').click();
 });
+// 펜팔 부치기 (데모 — 실제 백엔드 없이 토스트만)
+document.getElementById('penpal-send').addEventListener('click',()=>{
+  const msg=document.getElementById('message').value.trim();
+  if(!msg){
+    flashStatus('penpal-status','메시지를 먼저 작성하세요',true);
+    return;
+  }
+  // LocalStorage에 부친 흔적만 기록 (데모용)
+  const sent=JSON.parse(localStorage.getItem('morning-mom-penpal-sent')||'[]');
+  sent.push({msg,date:new Date().toISOString().slice(0,10),topic:'그리운 사람'});
+  localStorage.setItem('morning-mom-penpal-sent',JSON.stringify(sent));
+  flashStatus('penpal-status','📮 별빛 펜팔 사서함으로 익명 부치기 완료! (데모) 다음 주 갤러리에서 만나요');
+});
+
 document.getElementById('photo-upload').addEventListener('change',async(e)=>{
   const file=e.target.files[0];
   if(!file) return;

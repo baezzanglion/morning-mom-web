@@ -56,6 +56,34 @@
     "preview": "✨ 너에게 반짝이는 날들이|매일매일 늘어나면 좋겠어."
   },
   {
+    "file": "gallery/penpal-byeolbit.png",
+    "date": "2026-06-06",
+    "style": "penpal",
+    "tag": "별빛 · 그리운 사람",
+    "preview": "오래 못 본 사람|그래도 가끔|**생각이 나요.**"
+  },
+  {
+    "file": "gallery/penpal-kkochip.png",
+    "date": "2026-06-06",
+    "style": "penpal",
+    "tag": "꽃잎 · 그리운 사람",
+    "preview": "그리움이라는 건|마음에 남는|**따뜻한 자국이래요.**"
+  },
+  {
+    "file": "gallery/penpal-dalbit.png",
+    "date": "2026-06-06",
+    "style": "penpal",
+    "tag": "달빛 · 그리운 사람",
+    "preview": "오늘 문득|그 시간이 떠올라|**잘 지내시길.**"
+  },
+  {
+    "file": "gallery/penpal-haenim.png",
+    "date": "2026-06-06",
+    "style": "penpal",
+    "tag": "해님 · 그리운 사람",
+    "preview": "보고 싶다는 말|차마 못 꺼냈지만|**여기 적어둘게요.**"
+  },
+  {
     "file": "gallery/2026-05-31-shinseop-1.jpeg",
     "date": "2026-05-31",
     "style": "default",
