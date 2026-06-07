@@ -878,26 +878,62 @@ async function makeCardVoiceVideo(canvas, voiceBlob){
   });
 }
 
+// Vercel Function 엔드포인트 — webm → mp4(H.264) 서버 변환 (카톡 inline 자동재생용)
+const MP4_CONVERT_URL='https://mp4-server.vercel.app/api/convert';
+
 voiceDownload.addEventListener('click',async()=>{
   if(!_voiceBlob){voiceStatus.textContent='먼저 녹음하세요';return;}
   const recipient=document.getElementById('recipient').value.trim()||'card';
   const today=new Date().toISOString().slice(0,10);
   const origText=voiceDownload.textContent;
   voiceDownload.disabled=true;
-  voiceDownload.textContent='🎬 합성 중... (보이스 길이만큼 기다려 주세요)';
+  voiceDownload.textContent='🎬 합성 중... (보이스 길이만큼)';
+  voiceStatus.style.color='var(--muted)';
   voiceStatus.textContent='카드와 보이스를 비디오로 합치는 중...';
   try{
-    // canvas 최신 상태 보장
+    // 1) canvas 최신 상태 보장 후 webm 합성
     drawCard();
     await new Promise(r=>setTimeout(r,100));
     const canvas=document.getElementById('card');
-    const {blob,ext,duration}=await makeCardVoiceVideo(canvas,_voiceBlob);
+    const {blob:webmBlob,duration}=await makeCardVoiceVideo(canvas,_voiceBlob);
+
+    // 2) Vercel Function에 POST → mp4(H.264) 변환 받음
+    voiceDownload.textContent='🌐 mp4 서버 변환 중... (첫 호출은 좀 걸려요)';
+    voiceStatus.textContent='Vercel Function에 변환 요청 중...';
+    let finalBlob=webmBlob;
+    let ext='webm';
+    let serverFailed=false;
+    try{
+      const res=await fetch(MP4_CONVERT_URL,{
+        method:'POST',
+        headers:{'Content-Type':'video/webm'},
+        body:webmBlob,
+      });
+      if(res.ok && res.headers.get('content-type')?.includes('video/mp4')){
+        finalBlob=await res.blob();
+        ext='mp4';
+      } else {
+        serverFailed=true;
+        console.warn('서버 변환 실패, webm fallback:', res.status, await res.text());
+      }
+    }catch(fetchErr){
+      serverFailed=true;
+      console.warn('서버 호출 실패, webm fallback:', fetchErr);
+    }
+
+    // 3) 다운로드
     const a=document.createElement('a');
-    const url=URL.createObjectURL(blob);
+    const url=URL.createObjectURL(finalBlob);
     a.href=url; a.download=`${recipient}-${today}.${ext}`; a.click();
     setTimeout(()=>URL.revokeObjectURL(url),1000);
-    voiceStatus.textContent=`✓ 비디오 다운로드 (${Math.round(blob.size/1024)}KB, ${duration.toFixed(1)}초). 카톡에 보내면 자동 재생됩니다.`;
-    flashStatus('action-status','🎬 카드 + 보이스 비디오 다운로드 완료');
+
+    if(ext==='mp4'){
+      voiceStatus.textContent=`✓ mp4 다운로드 (${Math.round(finalBlob.size/1024)}KB, ${duration.toFixed(1)}초). 카톡에서 자동 재생됩니다.`;
+      flashStatus('action-status','🎬 mp4 다운로드 완료 — 카톡 inline 재생');
+    } else {
+      voiceStatus.textContent=`⚠️ 서버 변환 실패해서 webm 다운로드 (${Math.round(finalBlob.size/1024)}KB). 카톡에선 클릭해서 재생.`;
+      flashStatus('action-status','webm 다운로드 (mp4 변환 실패)',true);
+    }
   }catch(err){
     voiceStatus.textContent='합성 실패: '+(err.message||err);
     voiceStatus.style.color='#b85a3f';
