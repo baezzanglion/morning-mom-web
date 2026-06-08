@@ -137,6 +137,40 @@
     transition:.15s;
   }
   .penpal-btn:hover{background:#a890d4;color:#fff}
+  .journey{
+    display:flex;align-items:stretch;justify-content:center;
+    gap:10px;margin:0 auto 64px;max-width:880px;
+    flex-wrap:wrap;padding:0 16px;
+  }
+  .journey-step{
+    background:#fff;border:1px solid var(--border);
+    border-radius:14px;padding:22px 20px;text-align:center;
+    flex:1;min-width:180px;max-width:240px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .journey-step.is-target{
+    border-color:var(--accent);
+    background:linear-gradient(180deg,#fff 0%,var(--warm) 100%);
+    box-shadow:0 6px 20px rgba(170,130,125,.14);
+  }
+  .journey-icon{font-size:32px;margin-bottom:8px;line-height:1}
+  .journey-stage{
+    font-family:'Gaegu',cursive;font-weight:700;
+    font-size:20px;color:var(--accent-h);margin-bottom:6px;
+    line-height:1.2;
+  }
+  .journey-feel{
+    color:var(--muted);font-size:13px;line-height:1.5;
+  }
+  .journey-arrow{
+    color:var(--border);font-size:22px;font-weight:300;
+    display:flex;align-items:center;
+  }
+  @media(max-width:700px){
+    .journey{flex-direction:column;gap:12px}
+    .journey-step{width:100%;max-width:none}
+    .journey-arrow{transform:rotate(90deg);font-size:18px;justify-content:center}
+  }
   .from-gallery{
     margin-bottom:18px;padding:10px 14px;
     background:#fdf4e8;border:1px solid #e8d4b8;
@@ -220,6 +254,26 @@
     <div class="hero-em">꺼내는 게 힘든 거죠.</div>
     <p class="subtitle">사랑하는 가족에게 매일 한 줄 — 모닝맘</p>
   </header>
+
+  <section class="journey" aria-label="모닝맘과 함께하는 변화">
+    <div class="journey-step">
+      <div class="journey-icon">🌱</div>
+      <div class="journey-stage">한 달에 한 번</div>
+      <div class="journey-feel">할까 말까<br>망설이던 마음</div>
+    </div>
+    <div class="journey-arrow" aria-hidden="true">→</div>
+    <div class="journey-step">
+      <div class="journey-icon">🌿</div>
+      <div class="journey-stage">일주일에 2-3번</div>
+      <div class="journey-feel">꺼내기가<br>가벼워졌어요</div>
+    </div>
+    <div class="journey-arrow" aria-hidden="true">→</div>
+    <div class="journey-step is-target">
+      <div class="journey-icon">🌸</div>
+      <div class="journey-stage">매일 한 줄</div>
+      <div class="journey-feel">표현이<br>습관이 됐어요</div>
+    </div>
+  </section>
 
   <div class="layout">
 
