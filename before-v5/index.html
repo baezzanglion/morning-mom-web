@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>따뜻한 메시지 카드 · morning-mom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Hi+Melody&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf6f0;--card:#fff;--fg:#3c322d;--muted:#8a7a6f;
+    --accent:#aa827d;--accent-h:#8b6560;--border:#ece2d5;--warm:#fdf8f3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:'Gowun Batang','Apple SD Gothic Neo',sans-serif;
+    line-height:1.55;padding:32px 16px;
+  }
+  .container{max-width:1280px;margin:0 auto}
+  header{text-align:center;margin-bottom:32px}
+  h1{
+    font-family:'Gaegu',cursive;font-weight:700;font-size:42px;
+    color:var(--accent-h);letter-spacing:-0.5px;
+  }
+  .subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+  .layout{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}}
+  .panel{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:24px;
+  }
+  label{
+    display:block;font-size:13px;color:var(--muted);
+    margin-bottom:6px;margin-top:18px;font-weight:600;
+  }
+  label:first-child,fieldset label{margin-top:0}
+  input[type=text],input[type=password],textarea,select{
+    width:100%;padding:10px 12px;border:1px solid var(--border);
+    border-radius:8px;font-family:inherit;font-size:14px;
+    background:#fdfaf6;color:var(--fg);outline:none;
+  }
+  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+  textarea{min-height:60px;resize:vertical}
+  #message{font-family:'Gaegu',cursive;font-size:19px;min-height:110px;line-height:1.6}
+  small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+  fieldset{border:none;display:flex;gap:18px;margin-top:4px}
+  fieldset label{
+    display:flex;align-items:center;gap:6px;margin:0;
+    font-size:14px;color:var(--fg);cursor:pointer;font-weight:400;
+  }
+  button{
+    margin-top:16px;padding:11px 18px;background:var(--accent);
+    color:#fff;border:none;border-radius:8px;font-family:inherit;
+    font-size:14px;font-weight:600;cursor:pointer;transition:.15s;
+  }
+  button:hover{background:var(--accent-h)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  button.ghost:hover{background:var(--warm)}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .row button{flex:1;min-width:120px}
+  canvas{
+    width:100%;height:auto;border-radius:12px;display:block;
+    box-shadow:0 8px 32px rgba(60,50,45,.08);
+  }
+  #suggestions{
+    margin-top:16px;padding-top:16px;border-top:1px solid var(--border);
+  }
+  #suggestions h3{
+    font-size:13px;color:var(--muted);margin-bottom:10px;
+    font-weight:600;text-transform:uppercase;letter-spacing:.5px;
+  }
+  .sugg{
+    background:var(--warm);border:1px solid var(--border);
+    border-radius:8px;padding:14px;margin-bottom:8px;
+  }
+  .sugg pre{
+    font-family:'Gaegu',cursive;font-size:18px;white-space:pre-wrap;
+    color:var(--fg);margin-bottom:10px;line-height:1.5;
+  }
+  .sugg button{margin-top:0;padding:6px 12px;font-size:13px}
+  details{
+    margin-top:24px;padding:14px 16px;background:var(--warm);
+    border:1px solid var(--border);border-radius:8px;
+  }
+  summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
+  details[open] summary{margin-bottom:12px}
+  details p{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
+  .warn{font-size:12px;color:#b85a3f;margin-top:6px;font-weight:600}
+  .status{font-size:13px;color:var(--muted);margin-top:8px;min-height:18px}
+  .preview-wrap{position:sticky;top:24px}
+  .gallery-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:14px;padding:10px 18px;
+    background:var(--warm);border:1px solid var(--accent);
+    border-radius:999px;color:var(--accent-h);
+    font-size:14px;font-weight:600;text-decoration:none;
+    transition:.15s;
+  }
+  .gallery-btn:hover{background:var(--accent);color:#fff}
+  .gallery-cta{
+    display:block;text-align:center;margin-top:14px;
+    padding:10px;background:var(--warm);
+    border:1px dashed var(--border);border-radius:8px;
+    color:var(--accent-h);text-decoration:none;font-size:13px;
+  }
+  .gallery-cta:hover{background:#f5ebdf}
+  .penpal-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:14px;margin-left:8px;padding:10px 18px;
+    background:#f3eef9;border:1px solid #a890d4;
+    border-radius:999px;color:#6a4fa3;
+    font-size:14px;font-weight:600;text-decoration:none;
+    transition:.15s;
+  }
+  .penpal-btn:hover{background:#a890d4;color:#fff}
+  .from-gallery{
+    margin-bottom:18px;padding:10px 14px;
+    background:#fdf4e8;border:1px solid #e8d4b8;
+    border-radius:8px;font-size:13px;color:var(--accent-h);
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .from-gallery button{
+    margin:0;padding:4px 10px;font-size:12px;
+    background:transparent;color:var(--muted);border:none;
+  }
+  .from-gallery button:hover{background:transparent;color:var(--fg)}
+  .font-grid{flex-wrap:wrap;gap:12px}
+  .font-grid label{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--warm)}
+  .font-grid label:has(input:checked){border-color:var(--accent);background:#fff}
+  .theme-grid{flex-wrap:wrap;gap:12px;margin-bottom:8px}
+  .theme-chips{
+    display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 12px 6px 6px;border:1px solid var(--border);
+    border-radius:999px;background:var(--warm);cursor:pointer;
+    font-size:13px;
+  }
+  .chip:has(input:checked){border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px rgba(170,130,125,0.18)}
+  .chip input{display:none}
+  .chip-swatch{
+    width:22px;height:22px;border-radius:50%;border:1px solid var(--border);
+    display:inline-block;
+  }
+  .custom-colors{
+    display:flex;gap:18px;margin-top:8px;padding:10px;
+    background:var(--warm);border:1px solid var(--border);border-radius:8px;
+  }
+  .color-row{
+    display:flex;align-items:center;gap:8px;margin:0;
+    font-size:13px;color:var(--fg);font-weight:600;
+  }
+  .color-row input[type=color]{
+    width:48px;height:32px;padding:0;border:1px solid var(--border);
+    border-radius:6px;background:none;cursor:pointer;
+  }
+  .polaroid-row{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;
+  }
+  .voice-row{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;
+  }
+  .toggle{
+    display:flex;align-items:center;gap:6px;margin:0;font-size:14px;cursor:pointer;
+  }
+  footer{
+    text-align:center;color:var(--muted);font-size:12px;
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
+  }
+  footer a{color:var(--accent-h)}
+</style>
+</head>
+<body>
+<!-- 폰트 글리프 강제 preloader — canvas는 fonts.ready 추적 사각지대라
+     hidden 한국어 글리프를 실제로 그려서 브라우저가 폰트를 실로드하게 함 -->
+<div aria-hidden="true" style="position:absolute;visibility:hidden;height:0;overflow:hidden;left:-9999px;top:-9999px">
+  <span style="font-family:'Gaegu',cursive;font-weight:400">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Gaegu',cursive;font-weight:700">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Gowun Batang',serif;font-weight:400">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Gowun Batang',serif;font-weight:700">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Nanum Pen Script',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Nanum Brush Script',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
+  <span style="font-family:'Hi Melody',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
+</div>
+
+<div class="container">
+
+  <header>
+    <h1>따뜻한 메시지 카드</h1>
+    <p class="subtitle">사랑하는 사람에게 한 줄, 손글씨 카드로</p>
+    <a href="gallery.html" class="gallery-btn" id="gallery-btn">
+      <span>📷</span><span>갤러리</span><span id="gallery-count" style="opacity:.7"></span>
+    </a>
+    <a href="pen-pal.html" class="penpal-btn" id="penpal-btn">
+      <span>📮</span><span>펜팔</span>
+    </a>
+  </header>
+
+  <div class="layout">
+
+    <section class="panel">
+      <div id="from-gallery" class="from-gallery" hidden>
+        <span>💌 갤러리에서 가져온 문구예요. 자유롭게 수정하세요.</span>
+        <button id="from-gallery-close" type="button" aria-label="닫기">✕</button>
+      </div>
+
+      <label for="recipient">받는 사람 (호칭)</label>
+      <input id="recipient" type="text" value="엄마" placeholder="엄마 / 아빠 / 친구 이름">
+
+      <label for="profile">받는 사람에 대해 (한두 줄)</label>
+      <textarea id="profile" placeholder="예: 1954년생, 시골에서 농사 지으시고 일요일엔 교회에 가심. 백합을 좋아하심."></textarea>
+
+      <label for="hint">오늘의 단서 <span style="color:var(--muted);font-weight:400">(선택)</span></label>
+      <textarea id="hint" placeholder="예: 오늘 날씨 더움, 건강에 대한 걱정"></textarea>
+      <small id="weather-hint" style="color:var(--accent-h)">🌤️ 오늘 서울 날씨가 AI 제안에 자동 반영됩니다</small>
+
+      <label for="tone">톤</label>
+      <select id="tone">
+        <option value="다정">다정 (기본)</option>
+        <option value="위트">위트 (살짝 장난기)</option>
+        <option value="차분">차분 (담백한 무게감)</option>
+      </select>
+
+      <label for="relationship">관계</label>
+      <select id="relationship">
+        <option value="가족">가족 (기본)</option>
+        <option value="친한 친구">친한 친구 (오글거림 ↓, 위트 ↑)</option>
+        <option value="직장 동료">직장 동료 (정중·가볍게)</option>
+        <option value="지인">지인 (중립)</option>
+      </select>
+
+      <label for="gender">받는 사람 성별 <span style="color:var(--muted);font-weight:400">(선택)</span></label>
+      <select id="gender">
+        <option value="미지정">미지정</option>
+        <option value="여성">여성</option>
+        <option value="남성">남성</option>
+      </select>
+
+      <label class="toggle" style="margin-top:14px;font-size:13px">
+        <input type="checkbox" id="include-scripture"> ✝️ 어울리는 성경 구절 함께 제안
+      </label>
+
+      <button id="suggest">✨ AI 후보 3개 제안받기</button>
+      <div class="status" id="suggest-status"></div>
+      <div id="suggestions" hidden></div>
+
+      <label for="message">메시지 (직접 입력 또는 위에서 선택)</label>
+      <textarea id="message">사랑 받는 게|당연한 사람이 있어요.|**엄마, 당신이에요.**</textarea>
+      <small>의미단위 줄바꿈 <code>|</code> · 굵게 <code>**...**</code> · 작은 글씨 <code>~~...~~</code> (인용·출처용)</small>
+
+      <label>폰트</label>
+      <fieldset class="font-grid">
+        <label><input type="radio" name="font" value="gaegu" checked> <span style="font-family:'Gaegu',cursive;font-size:18px">둥근 손글씨</span></label>
+        <label><input type="radio" name="font" value="gowun"> <span style="font-family:'Gowun Batang',serif">차분한 명조</span></label>
+        <label><input type="radio" name="font" value="pen"> <span style="font-family:'Nanum Pen Script',cursive;font-size:20px">잉크펜</span></label>
+        <label><input type="radio" name="font" value="brush"> <span style="font-family:'Nanum Brush Script',cursive;font-size:20px">붓글씨</span></label>
+        <label><input type="radio" name="font" value="melody"> <span style="font-family:'Hi Melody',cursive;font-size:18px">멜로디</span></label>
+      </fieldset>
+
+      <label>색 테마</label>
+      <fieldset class="theme-grid">
+        <label><input type="radio" name="color-mode" value="theme" checked> 테마</label>
+        <label><input type="radio" name="color-mode" value="custom"> 직접 선택</label>
+      </fieldset>
+      <div id="theme-options" class="theme-chips">
+        <label class="chip"><input type="radio" name="theme" value="beige" checked><span class="chip-swatch" style="background:linear-gradient(135deg,#f7f0e8,#e4d4cd)"></span>🌅 베이지</label>
+        <label class="chip"><input type="radio" name="theme" value="charcoal"><span class="chip-swatch" style="background:linear-gradient(135deg,#46413c,#2d2826)"></span>🌙 차콜</label>
+        <label class="chip"><input type="radio" name="theme" value="pink"><span class="chip-swatch" style="background:linear-gradient(135deg,#fce8e8,#f0d4da)"></span>💐 핑크</label>
+        <label class="chip"><input type="radio" name="theme" value="mint"><span class="chip-swatch" style="background:linear-gradient(135deg,#e8f5ee,#d4e8de)"></span>🌿 민트</label>
+        <label class="chip"><input type="radio" name="theme" value="lavender"><span class="chip-swatch" style="background:linear-gradient(135deg,#f0ebfa,#dedaf0)"></span>☁️ 라벤더</label>
+        <label class="chip"><input type="radio" name="theme" value="night"><span class="chip-swatch" style="background:linear-gradient(135deg,#1c2037,#0f1226)"></span>🌌 밤</label>
+      </div>
+      <div id="custom-options" class="custom-colors" hidden>
+        <label class="color-row">배경 <input type="color" id="bg-color" value="#faf6f0"></label>
+        <label class="color-row">글씨 <input type="color" id="fg-color" value="#3c322d"></label>
+      </div>
+
+      <label>📷 폴라로이드 (사진 추가)</label>
+      <div class="polaroid-row">
+        <label class="toggle"><input type="checkbox" id="polaroid-mode"> 폴라로이드 모드</label>
+        <input type="file" id="photo-upload" accept="image/*" style="display:none">
+        <button id="upload-btn" type="button" class="ghost" style="margin-top:0;padding:8px 14px;font-size:13px">사진 선택</button>
+        <span id="photo-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+
+      <div class="row">
+        <button id="download">📥 PNG 다운로드</button>
+        <button id="copy" class="ghost">📋 이미지 복사</button>
+      </div>
+      <div class="status" id="action-status"></div>
+
+      <a href="gallery.html" class="gallery-cta">💌 다른 분들이 보낸 카드 둘러보기 →</a>
+
+      <button id="penpal-send" class="ghost" style="margin-top:10px;width:100%">📮 펜팔에 익명으로 부치기 (이번 주 주제: 그리운 사람)</button>
+      <div class="status" id="penpal-status"></div>
+
+      <label style="margin-top:24px">🎙️ 보이스 녹음 <span style="color:var(--muted);font-weight:400">(선택 — 카드와 함께 카톡에 보내요)</span></label>
+      <div class="voice-row">
+        <button id="voice-rec" type="button" class="ghost" style="margin-top:0;padding:8px 14px;font-size:13px">🔴 녹음 시작</button>
+        <button id="voice-stop" type="button" class="ghost" style="margin-top:0;padding:8px 14px;font-size:13px;display:none">⏹ 중지</button>
+        <span id="voice-status" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+      <audio id="voice-preview" controls style="width:100%;margin-top:8px;display:none"></audio>
+      <button id="voice-download" type="button" class="ghost" style="margin-top:8px;display:none">🎬 카드 + 보이스 비디오 다운로드 (카톡 자동재생)</button>
+
+      <details>
+        <summary>🔐 AI 호출용 API key 설정 (선택)</summary>
+        <p>"AI 후보 3개 제안받기" 기능을 쓰려면 본인 Anthropic API key가 필요합니다.</p>
+        <label for="apikey" style="margin-top:12px">Anthropic API Key</label>
+        <input id="apikey" type="password" placeholder="sk-ant-...">
+        <button id="save-key" style="margin-top:10px">저장</button>
+        <button id="clear-key" class="ghost" style="margin-top:10px">지우기</button>
+        <p class="warn">⚠ 본인 브라우저 LocalStorage에만 저장됩니다. 절대 이 페이지를 화면 캡쳐/공유하지 마세요 (key 노출 위험).</p>
+      </details>
+    </section>
+
+    <section>
+      <div class="preview-wrap">
+        <canvas id="card" width="1080" height="1080"></canvas>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>morning-mom · <a href="https://github.com" target="_blank" rel="noopener">스폰지클럽 3주차</a></p>
+    <p style="margin-top:4px">하네스 + 오케스트레이션이 만드는 따뜻한 한 줄</p>
+  </footer>
+</div>
+
+<script>
+// ── 카드 렌더링 ─────────────────────────
+const W=1080,H=1080;
+
+// 폰트 프리셋 (시각적 크기 균형 맞춤)
+const PRESETS={
+  gaegu:  {family:"'Gaegu',cursive",                size:102, line:1.30, foot:38},
+  gowun:  {family:"'Gowun Batang',serif",           size:72,  line:1.45, foot:30},
+  pen:    {family:"'Nanum Pen Script',cursive",     size:120, line:1.10, foot:44},
+  brush:  {family:"'Nanum Brush Script',cursive",   size:115, line:1.15, foot:42},
+  melody: {family:"'Hi Melody',cursive",            size:95,  line:1.30, foot:36},
+};
+
+// 테마 (배경 그라데이션 + 본문 + 푸터 색 한 세트)
+const THEMES={
+  beige:    {bgTop:'rgb(247,240,232)', bgBot:'rgb(228,212,205)', fg:'rgb(60,50,45)',    accent:'rgb(170,130,125)', label:'🌅 베이지'},
+  charcoal: {bgTop:'rgb(70,65,60)',    bgBot:'rgb(45,40,38)',    fg:'rgb(245,235,220)', accent:'rgb(210,180,160)', label:'🌙 차콜'},
+  pink:     {bgTop:'rgb(252,232,232)', bgBot:'rgb(240,212,218)', fg:'rgb(80,40,55)',    accent:'rgb(180,100,120)', label:'💐 핑크'},
+  mint:     {bgTop:'rgb(232,245,238)', bgBot:'rgb(212,232,222)', fg:'rgb(40,75,60)',    accent:'rgb(100,160,130)', label:'🌿 민트'},
+  lavender: {bgTop:'rgb(240,235,250)', bgBot:'rgb(222,218,240)', fg:'rgb(50,45,90)',    accent:'rgb(130,120,180)', label:'☁️ 라벤더'},
+  night:    {bgTop:'rgb(28,32,55)',    bgBot:'rgb(15,18,38)',    fg:'rgb(245,225,170)', accent:'rgb(220,180,120)', label:'🌌 밤'},
+};
+
+// 업로드된 사진 (폴라로이드용) — Image 객체로 캐싱
+let uploadedPhoto=null;
+
+function parseChunks(msg){
+  const raw=msg.replace(/\|/g,'\n').split('\n').map(s=>s.trim()).filter(Boolean);
+  return raw.map(c=>{
+    const sm=c.match(/^~~(.+)~~$/);
+    if(sm) return {text:sm[1].trim(),bold:false,small:true};
+    const m=c.match(/^\*\*(.+)\*\*$/);
+    if(m) return {text:m[1].trim(),bold:true,small:false};
+    return {text:c,bold:false,small:false};
+  });
+}
+
+function wrap(ctx,text,maxW){
+  if(ctx.measureText(text).width<=maxW) return [text];
+  const words=text.split(' ');
+  if(words.length>1){
+    const lines=[];let cur='';
+    for(const w of words){
+      const test=(cur+' '+w).trim();
+      if(ctx.measureText(test).width<=maxW){cur=test}
+      else{if(cur)lines.push(cur);cur=w}
+    }
+    if(cur)lines.push(cur);
+    return lines;
+  }
+  const lines=[];let cur='';
+  for(const ch of text){
+    if(ctx.measureText(cur+ch).width<=maxW){cur+=ch}
+    else{lines.push(cur);cur=ch}
+  }
+  if(cur)lines.push(cur);
+  return lines;
+}
+
+// 현재 선택된 색 옵션 반환 (테마 모드 vs 커스텀 모드)
+function getColors(){
+  const mode=document.querySelector('input[name="color-mode"]:checked').value;
+  if(mode==='custom'){
+    const bg=document.getElementById('bg-color').value;
+    const fg=document.getElementById('fg-color').value;
+    return {bgTop:bg, bgBot:bg, fg:fg, accent:fg, mode:'custom'};
+  }
+  const themeKey=document.querySelector('input[name="theme"]:checked')?.value||'beige';
+  return {...THEMES[themeKey], mode:'theme'};
+}
+
+// 폴라로이드 합성: 사진을 카드 상단에 흰 프레임으로 얹음. 반환 = 폴라로이드 끝 y
+function drawPolaroid(ctx, photo){
+  const photoW=580, photoH=440;
+  const borderTop=25, borderSide=25, borderBottom=80;
+  const polaroidW=photoW+borderSide*2;
+  const polaroidH=photoH+borderTop+borderBottom;
+  const px=Math.floor((W-polaroidW)/2);
+  const py=70;
+  // 그림자
+  ctx.save();
+  ctx.shadowColor='rgba(60,40,30,0.35)';
+  ctx.shadowBlur=24;
+  ctx.shadowOffsetY=6;
+  ctx.fillStyle='#fff';
+  ctx.fillRect(px, py, polaroidW, polaroidH);
+  ctx.restore();
+  // 사진 center-crop fit (ImageBitmap·HTMLImageElement 모두 width/height 사용 가능)
+  const pw=photo.width||photo.naturalWidth;
+  const ph=photo.height||photo.naturalHeight;
+  const srcR=pw/ph;
+  const tgtR=photoW/photoH;
+  let sx=0,sy=0,sw=pw,sh=ph;
+  if(srcR>tgtR){
+    sw=ph*tgtR; sx=(pw-sw)/2;
+  } else {
+    sh=pw/tgtR; sy=(ph-sh)/2;
+  }
+  ctx.drawImage(photo, sx, sy, sw, sh, px+borderSide, py+borderTop, photoW, photoH);
+  return py+polaroidH;
+}
+
+function drawCard(){
+  const canvas=document.getElementById('card');
+  const ctx=canvas.getContext('2d');
+  const fontKey=document.querySelector('input[name="font"]:checked').value;
+  const preset=PRESETS[fontKey];
+  const message=document.getElementById('message').value;
+  const recipient=document.getElementById('recipient').value.trim()||'당신';
+  const isPolaroid=document.getElementById('polaroid-mode').checked && uploadedPhoto;
+  const colors=getColors();
+
+  // 배경 (그라데이션 또는 단색)
+  if(colors.bgTop===colors.bgBot){
+    ctx.fillStyle=colors.bgTop; ctx.fillRect(0,0,W,H);
+  } else {
+    const g=ctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,colors.bgTop); g.addColorStop(1,colors.bgBot);
+    ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  }
+
+  // 폴라로이드 (사진 있을 때만)
+  let bodyTopOverride=null;
+  if(isPolaroid){
+    const endY=drawPolaroid(ctx, uploadedPhoto);
+    bodyTopOverride=endY+30;
+  }
+
+  // 본문
+  ctx.textAlign='center'; ctx.textBaseline='top'; ctx.fillStyle=colors.fg;
+  let baseSize=isPolaroid? Math.floor(preset.size*0.78) : preset.size;
+  const chunks=parseChunks(message);
+
+  // 길이/줄 수 기반 자동 축소 — 본문이 카드 밖으로 밀리는 것 방지
+  const totalChars=chunks.reduce((s,c)=>s+c.text.length,0);
+  if(totalChars>40) baseSize=Math.floor(baseSize*0.88);
+  if(totalChars>70 || chunks.length>=5) baseSize=Math.floor(baseSize*0.85);
+
+  // chunk별 wrap + line height (small chunk는 60% 크기·작은 line height)
+  const smallRatio=0.55;
+  const renderLines=[];
+  for(const {text,bold,small} of chunks){
+    const size=small? Math.floor(baseSize*smallRatio) : baseSize;
+    ctx.font=`${bold?'700':'400'} ${size}px ${preset.family}`;
+    for(const line of wrap(ctx,text,W-200)){
+      renderLines.push({text:line,bold,small,size});
+    }
+  }
+  const totalH=renderLines.reduce((s,l)=>s+Math.floor(l.size*preset.line),0);
+  let y;
+  if(bodyTopOverride!=null){
+    const availH=H-bodyTopOverride-100;
+    y=bodyTopOverride+Math.max(0,(availH-totalH)/2);
+  } else {
+    y=Math.floor((H-totalH)/2)-30;
+  }
+  for(const {text,bold,size} of renderLines){
+    ctx.font=`${bold?'700':'400'} ${size}px ${preset.family}`;
+    ctx.fillText(text,W/2,y);
+    y+=Math.floor(size*preset.line);
+  }
+
+  // 푸터
+  const today=new Date().toISOString().slice(0,10);
+  ctx.font=`400 ${preset.foot}px ${preset.family}`;
+  ctx.fillStyle=colors.accent;
+  ctx.fillText(`${today}  ·  ${recipient}에게`,W/2,H-80);
+}
+
+// ── 다운로드 / 복사 ─────────────────────
+function flashStatus(id,msg,isErr=false){
+  const el=document.getElementById(id);
+  el.textContent=msg;
+  el.style.color=isErr?'#b85a3f':'var(--muted)';
+  setTimeout(()=>{if(el.textContent===msg)el.textContent=''},4000);
+}
+
+document.getElementById('download').addEventListener('click',()=>{
+  const canvas=document.getElementById('card');
+  canvas.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    const recipient=document.getElementById('recipient').value.trim()||'card';
+    const today=new Date().toISOString().slice(0,10);
+    a.href=url;a.download=`${recipient}-${today}.png`;a.click();
+    URL.revokeObjectURL(url);
+    flashStatus('action-status','✓ 다운로드 완료');
+  });
+});
+
+document.getElementById('copy').addEventListener('click',async()=>{
+  const canvas=document.getElementById('card');
+  canvas.toBlob(async blob=>{
+    try{
+      await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+      flashStatus('action-status','✓ 이미지가 클립보드에 복사됐어요. 카톡에 붙여넣기 하세요.');
+    }catch(e){
+      flashStatus('action-status','복사 실패: '+e.message+' (브라우저가 지원 안 할 수 있어요. 다운로드 이용)',true);
+    }
+  });
+});
+
+// ── API key 저장 ────────────────────────
+const KEY_NAME='morning-mom-anthropic-key';
+const keyInput=document.getElementById('apikey');
+keyInput.value=localStorage.getItem(KEY_NAME)||'';
+document.getElementById('save-key').addEventListener('click',()=>{
+  const k=keyInput.value.trim();
+  if(!k){alert('Key를 입력하세요');return}
+  localStorage.setItem(KEY_NAME,k);
+  alert('저장됐어요. 본인 브라우저에만 저장됩니다.');
+});
+document.getElementById('clear-key').addEventListener('click',()=>{
+  localStorage.removeItem(KEY_NAME);
+  keyInput.value='';
+  alert('지웠어요.');
+});
+
+// ── 외부 정보: 날씨 (모닝라이언 wttr.in 패턴 재활용) ─
+// 30분 캐시로 호출 최소화. CORS 허용된 무료 API. 실패 시 silent fallback.
+let _weatherCache=null,_weatherCachedAt=0;
+async function getWeather(city='Seoul'){
+  if(_weatherCache && Date.now()-_weatherCachedAt < 30*60*1000) return _weatherCache;
+  try{
+    const res=await fetch(`https://wttr.in/${city}?format=%C+%t`);
+    if(!res.ok) return null;
+    const text=(await res.text()).trim();
+    if(!text || text.length>80) return null;
+    _weatherCache=text; _weatherCachedAt=Date.now();
+    return text;
+  }catch(e){ return null; }
+}
+
+// ── AI 후보 제안 (Anthropic API 직접 호출) ─
+async function callClaude(systemPrompt,userPrompt,key){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{
+      'x-api-key':key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true',
+      'content-type':'application/json'
+    },
+    body:JSON.stringify({
+      model:'claude-haiku-4-5-20251001',
+      max_tokens:1024,
+      system:systemPrompt,
+      messages:[{role:'user',content:userPrompt}]
+    })
+  });
+  const data=await res.json();
+  if(!res.ok) throw new Error(data.error?.message||JSON.stringify(data));
+  return data.content[0].text;
+}
+
+function buildSystem(recipient,profile,tone,relationship,gender,includeScripture){
+  const relationshipGuide={
+    "가족":"따뜻하고 다정. 호칭 자연스럽게 (엄마/아빠/형/누나 등)",
+    "친한 친구":"친구 별명·반말 자연스럽게. **너무 \"오글오글\"하지 않게** — 위트나 가벼운 감동·관찰 결로. 직접적인 사랑 표현보다 *옆에 있는 자국*을 그리듯이",
+    "직장 동료":"정중하지만 가볍게. 사적 침범 금지. 일상의 작은 응원이나 관찰 결",
+    "지인":"중립적·담백. 거리감 유지하면서도 따뜻함",
+  }[relationship]||"";
+
+  const examplesByRelationship={
+    "가족":`- 사랑 받는 게|당연한 사람이 있어요.|**엄마, 당신이에요.**
+- 오늘 백합 한 송이 같은|하루 보내시길.|**단단하고 환하게.**
+- 어떤 날엔|그저 엄마라는 존재만으로도|충분해요.`,
+    "친한 친구":`- 너 오늘|좋은 일 하나만|더 있어라.
+- 평범한 하루도|너랑 있으면|괜찮은 하루가 돼.
+- 별일 없는 게|제일 별일이지.|**그래서 좋아.**`,
+    "직장 동료":`- 한 주의 끝자락|작은 여유 한 잔.|애쓰셨습니다.
+- 오늘 책상 위에|좋은 소식 하나.|조용히 응원합니다.
+- 바쁜 하루 속|짧은 호흡 한 번.`,
+    "지인":`- 오늘 하루|작게라도 환한 일.
+- 잘 지내시기를.|그 한 마디로 충분한 날.`,
+  }[relationship]||"";
+
+  return `너는 사용자가 ${recipient}에게 보낼 따뜻한 카드 메시지를 만드는 도구다.
+
+[받는 사람 정보]
+${profile||'(정보 없음 — 일반적이고 따뜻한 표현으로)'}
+
+[관계]
+- 종류: ${relationship}
+- 성별: ${gender}
+- 결: ${relationshipGuide}
+
+[양식 규칙 — 반드시 따름]
+- 카드 한 장에 2~3줄
+- 한 줄당 14자 내외
+- 의미단위 줄바꿈은 \`|\`로 표시
+- 강조할 한 줄은 \`**...**\`으로 감싼다 (보통 마지막 호명/핵심 한 줄, 카드당 최대 1줄)
+- 톤: ${tone}
+- 호칭·결은 [관계]에 맞게 조정
+
+[금기]
+- "화이팅", "파이팅", "오늘도 힘내세요" 같은 흔한 응원
+- "X해야 해요" 같은 당위
+- 비교 칭찬 ("X처럼 훌륭한 사람 없어요")
+- 강한 종교적 단정
+- 받는 사람에게 부담스러운 직접 인용 ("어제 X라고 했잖아")
+- 친한 친구 관계인데 "당신은 소중한 사람" 류의 *오글거림* 표현
+
+[좋은 예시 — ${relationship}]
+${examplesByRelationship}
+
+서로 결이 다른 후보 **3개**를 다음 JSON 배열로 반환:
+${includeScripture
+  ? `[{"message":"...","scripture":"..."},{"message":"...","scripture":"..."},{"message":"...","scripture":"..."}]
+- scripture: 메시지 결과 어울리는 한국어 개역개정 성경 구절 한 줄 인용 + 출처(예: "수고하고 무거운 짐 진 자들아 다 내게로 오라 (마태복음 11:28)"). 받는 사람이 종교적 컨텍스트일 때만 의미. 정확한 구절만 인용.`
+  : `[{"message":"..."},{"message":"..."},{"message":"..."}]`}
+
+JSON만 출력. 설명 금지.`;
+}
+
+document.getElementById('suggest').addEventListener('click',async()=>{
+  const key=localStorage.getItem(KEY_NAME);
+  if(!key){
+    flashStatus('suggest-status','API key를 먼저 설정하세요 (아래 🔐 영역)',true);
+    return;
+  }
+  const recipient=document.getElementById('recipient').value.trim()||'엄마';
+  const profile=document.getElementById('profile').value.trim();
+  const hint=document.getElementById('hint').value.trim();
+  const tone=document.getElementById('tone').value;
+  const relationship=document.getElementById('relationship').value;
+  const gender=document.getElementById('gender').value;
+  const includeScripture=document.getElementById('include-scripture').checked;
+
+  const btn=document.getElementById('suggest');
+  btn.disabled=true;btn.textContent='생성 중...';
+  flashStatus('suggest-status','Claude에게 묻는 중...');
+
+  try{
+    const system=buildSystem(recipient,profile,tone,relationship,gender,includeScripture);
+    // 날씨 외부 정보 자동 주입 (모닝라이언 wttr.in 패턴) — 실패해도 진행
+    const weather=await getWeather();
+    const weatherLine=weather?`[오늘 외부 정보]\n현재 서울 날씨: ${weather}\n메시지에 자연스럽게 녹여도 좋고, 어울리지 않으면 무시.\n\n`:'';
+    const user=`${weatherLine}${hint?`오늘 단서: ${hint}\n`:''}위 양식 그대로 후보 3개 JSON으로.`;
+    const text=await callClaude(system,user,key);
+    const match=text.match(/\[[\s\S]*\]/);
+    if(!match) throw new Error('JSON을 찾지 못함: '+text.slice(0,200));
+    const arr=JSON.parse(match[0]);
+    renderSuggestions(arr);
+    flashStatus('suggest-status','✓ 후보 3개 도착');
+  }catch(e){
+    flashStatus('suggest-status','실패: '+e.message,true);
+  }finally{
+    btn.disabled=false;btn.textContent='✨ AI 후보 3개 제안받기';
+  }
+});
+
+function renderSuggestions(arr){
+  const div=document.getElementById('suggestions');
+  div.innerHTML='<h3>후보 3개</h3>'+arr.map((it,i)=>{
+    const display=(it.message||'').replace(/\|/g,'\n');
+    const escMsg=(it.message||'').replace(/"/g,'&quot;');
+    const scripture=(it.scripture||'').trim();
+    // 성경 구절은 ~~...~~로 감싸 작은 글씨로 렌더 (카드 밖으로 밀림 방지)
+    const escMsgWithScripture=scripture
+      ? ((it.message||'')+'|~~'+scripture+'~~').replace(/"/g,'&quot;')
+      : escMsg;
+    const scriptureBlock=scripture
+      ? `<div style="margin-top:8px;padding:8px 10px;background:#fff8e8;border-left:3px solid #d9b06b;border-radius:4px;font-size:13px;color:#7a5a2a;line-height:1.5">✝️ ${scripture.replace(/</g,'&lt;')}</div>`
+      : '';
+    const scriptureBtn=scripture
+      ? `<button data-msg="${escMsgWithScripture}" class="ghost" style="margin-left:6px">+ 성경 구절 포함해 선택</button>`
+      : '';
+    return `<div class="sugg"><pre>${display}</pre>${scriptureBlock}<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"><button data-msg="${escMsg}">이 메시지로 선택</button>${scriptureBtn}</div></div>`;
+  }).join('');
+  div.hidden=false;
+  div.querySelectorAll('button[data-msg]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.getElementById('message').value=b.dataset.msg;
+      drawCard();
+      document.getElementById('message').scrollIntoView({behavior:'smooth',block:'center'});
+    });
+  });
+}
+
+// ── 실시간 미리보기 ─────────────────────
+['message','recipient'].forEach(id=>{
+  document.getElementById(id).addEventListener('input',drawCard);
+});
+document.querySelectorAll('input[name="font"]').forEach(r=>{
+  r.addEventListener('change',async ()=>{
+    const fontKey=document.querySelector('input[name="font"]:checked').value;
+    const preset=PRESETS[fontKey];
+    const family=preset.family.split(',')[0].replace(/'/g,'').trim();
+    // 본문·강조·작은(~~)·푸터 등 사용될 모든 size로 미리 load (글리프 캐시 강제)
+    const sizes=[preset.size, Math.floor(preset.size*0.88), Math.floor(preset.size*0.78), Math.floor(preset.size*0.55), preset.foot];
+    await Promise.all([
+      ...sizes.map(s=>document.fonts.load(`400 ${s}px '${family}'`).catch(()=>{})),
+      document.fonts.load(`700 ${preset.size}px '${family}'`).catch(()=>{}),
+    ]);
+    drawCard();
+    // 한 번 더 안전망 (브라우저 렌더 사이클이 폰트 swap을 반영하는 데 시간이 걸리는 케이스)
+    setTimeout(drawCard,80);
+  });
+});
+
+// 테마/커스텀 모드 토글
+const themeOpts=document.getElementById('theme-options');
+const customOpts=document.getElementById('custom-options');
+function syncColorMode(){
+  const mode=document.querySelector('input[name="color-mode"]:checked').value;
+  themeOpts.hidden = mode!=='theme';
+  customOpts.hidden = mode!=='custom';
+  drawCard();
+}
+document.querySelectorAll('input[name="color-mode"]').forEach(r=>{
+  r.addEventListener('change',syncColorMode);
+});
+document.querySelectorAll('input[name="theme"]').forEach(r=>{
+  r.addEventListener('change',drawCard);
+});
+document.getElementById('bg-color').addEventListener('input',drawCard);
+document.getElementById('fg-color').addEventListener('input',drawCard);
+
+// 폴라로이드 모드 + 사진 업로드
+document.getElementById('polaroid-mode').addEventListener('change',drawCard);
+document.getElementById('upload-btn').addEventListener('click',()=>{
+  document.getElementById('photo-upload').click();
+});
+// ── 보이스 녹음 (MediaRecorder API) ─────
+// 카드와 함께 본인 목소리로 메시지를 녹음. 다운로드 시 PNG + audio 같이.
+let _mediaRecorder=null;
+let _voiceChunks=[];
+let _voiceBlob=null;
+let _voiceUrl=null;
+let _voiceMime='audio/webm';
+let _voiceExt='webm';
+const recBtn=document.getElementById('voice-rec');
+const stopBtn=document.getElementById('voice-stop');
+const voicePreview=document.getElementById('voice-preview');
+const voiceStatus=document.getElementById('voice-status');
+const voiceDownload=document.getElementById('voice-download');
+
+recBtn.addEventListener('click',async()=>{
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    // 브라우저 호환성 — Safari는 mp4, Chrome/Firefox는 webm
+    const candidates=['audio/webm;codecs=opus','audio/webm','audio/mp4'];
+    _voiceMime=candidates.find(m=>MediaRecorder.isTypeSupported(m))||'';
+    _voiceExt=_voiceMime.includes('mp4')?'m4a':'webm';
+    _voiceChunks=[];
+    _mediaRecorder=_voiceMime
+      ? new MediaRecorder(stream,{mimeType:_voiceMime})
+      : new MediaRecorder(stream);
+    _mediaRecorder.ondataavailable=(e)=>{if(e.data.size>0)_voiceChunks.push(e.data)};
+    _mediaRecorder.onstop=()=>{
+      _voiceBlob=new Blob(_voiceChunks,{type:_voiceMime||'audio/webm'});
+      if(_voiceUrl)URL.revokeObjectURL(_voiceUrl);
+      _voiceUrl=URL.createObjectURL(_voiceBlob);
+      voicePreview.src=_voiceUrl;
+      voicePreview.style.display='block';
+      voiceDownload.style.display='inline-block';
+      voiceStatus.textContent=`✓ 녹음 완료 (${Math.round(_voiceBlob.size/1024)}KB)`;
+      stream.getTracks().forEach(t=>t.stop());
+    };
+    _mediaRecorder.start();
+    recBtn.style.display='none';
+    stopBtn.style.display='inline-block';
+    voiceStatus.textContent='🔴 녹음 중... 메시지를 천천히 읽어주세요';
+  }catch(err){
+    voiceStatus.textContent='마이크 권한이 필요해요: '+err.message;
+    voiceStatus.style.color='#b85a3f';
+  }
+});
+
+stopBtn.addEventListener('click',()=>{
+  if(_mediaRecorder && _mediaRecorder.state==='recording'){
+    _mediaRecorder.stop();
+  }
+  stopBtn.style.display='none';
+  recBtn.style.display='inline-block';
+  recBtn.textContent='🔁 다시 녹음';
+});
+
+// 카드 canvas + 보이스 Blob → 비디오로 합성 (카톡 자동재생용)
+async function makeCardVoiceVideo(canvas, voiceBlob){
+  // 1. 카드를 비디오 스트림으로
+  // 주의: 정적 canvas는 captureStream이 프레임을 송출 안 함 → 녹화 중 강제 redraw 필요
+  const videoStream=canvas.captureStream(30);
+  // 2. 보이스 Blob → AudioContext로 디코드 → 스트림
+  const ac=new (window.AudioContext||window.webkitAudioContext)();
+  const arrayBuffer=await voiceBlob.arrayBuffer();
+  const audioBuffer=await ac.decodeAudioData(arrayBuffer);
+  const audioSource=ac.createBufferSource();
+  audioSource.buffer=audioBuffer;
+  const audioDest=ac.createMediaStreamDestination();
+  audioSource.connect(audioDest);
+  // 3. 비디오 + 오디오 합쳐서 단일 스트림
+  const combined=new MediaStream([
+    ...videoStream.getVideoTracks(),
+    ...audioDest.stream.getAudioTracks(),
+  ]);
+  // 4. MediaRecorder — webm(vp8+opus)이 가장 안정. mp4는 브라우저별 인코더 다름.
+  // 카톡 호환은 다음 단계에서 별도 처리 (mp4 H.264 진짜 인코딩은 FFmpeg.wasm 필요).
+  const candidates=[
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+    'video/mp4',
+  ];
+  const mime=candidates.find(m=>MediaRecorder.isTypeSupported(m))||'';
+  const ext=mime.includes('mp4')?'mp4':'webm';
+  const rec=new MediaRecorder(combined, mime?{mimeType:mime}:{});
+  const chunks=[];
+  rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)};
+
+  // 정적 canvas redraw 트리거 — 100ms마다 drawCard 호출해 captureStream에 프레임 송출
+  let frameTimer=null;
+  const startFrames=()=>{
+    frameTimer=setInterval(()=>{
+      try{ drawCard(); }catch(e){}
+    },100);
+  };
+  const stopFrames=()=>{
+    if(frameTimer){clearInterval(frameTimer); frameTimer=null;}
+  };
+
+  return new Promise((resolve,reject)=>{
+    let stopped=false;
+    const stopOnce=()=>{
+      if(stopped)return; stopped=true;
+      stopFrames();
+      if(rec.state==='recording'){rec.stop();}
+    };
+    rec.onstop=()=>{
+      const blob=new Blob(chunks,{type:mime||'video/webm'});
+      resolve({blob,ext,duration:audioBuffer.duration});
+    };
+    rec.onerror=e=>{stopFrames(); reject(e);};
+    audioSource.onended=()=>{
+      // 보이스 끝난 후 300ms 여유 두고 stop (마지막 프레임 보장)
+      setTimeout(stopOnce,300);
+    };
+    // 안전망: max 보이스 길이 + 1.5초
+    setTimeout(stopOnce,(audioBuffer.duration+1.5)*1000);
+    rec.start(100); // 100ms timeslice — 더 자주 chunk 송출
+    startFrames();
+    audioSource.start();
+  });
+}
+
+// Vercel Function 엔드포인트 — webm → mp4(H.264) 서버 변환 (카톡 inline 자동재생용)
+const MP4_CONVERT_URL='https://mp4-server.vercel.app/api/convert';
+
+voiceDownload.addEventListener('click',async()=>{
+  if(!_voiceBlob){voiceStatus.textContent='먼저 녹음하세요';return;}
+  const recipient=document.getElementById('recipient').value.trim()||'card';
+  const today=new Date().toISOString().slice(0,10);
+  const origText=voiceDownload.textContent;
+  voiceDownload.disabled=true;
+  voiceDownload.textContent='🎬 합성 중... (보이스 길이만큼)';
+  voiceStatus.style.color='var(--muted)';
+  voiceStatus.textContent='카드와 보이스를 비디오로 합치는 중...';
+  try{
+    // 1) canvas 최신 상태 보장 후 webm 합성
+    drawCard();
+    await new Promise(r=>setTimeout(r,100));
+    const canvas=document.getElementById('card');
+    const {blob:webmBlob,duration}=await makeCardVoiceVideo(canvas,_voiceBlob);
+
+    // 2) Vercel Function에 POST → mp4(H.264) 변환 받음
+    voiceDownload.textContent='🌐 mp4 서버 변환 중... (첫 호출은 좀 걸려요)';
+    voiceStatus.textContent='Vercel Function에 변환 요청 중...';
+    let finalBlob=webmBlob;
+    let ext='webm';
+    let serverFailed=false;
+    try{
+      const res=await fetch(MP4_CONVERT_URL,{
+        method:'POST',
+        headers:{'Content-Type':'video/webm'},
+        body:webmBlob,
+      });
+      if(res.ok && res.headers.get('content-type')?.includes('video/mp4')){
+        finalBlob=await res.blob();
+        ext='mp4';
+      } else {
+        serverFailed=true;
+        console.warn('서버 변환 실패, webm fallback:', res.status, await res.text());
+      }
+    }catch(fetchErr){
+      serverFailed=true;
+      console.warn('서버 호출 실패, webm fallback:', fetchErr);
+    }
+
+    // 3) 다운로드
+    const a=document.createElement('a');
+    const url=URL.createObjectURL(finalBlob);
+    a.href=url; a.download=`${recipient}-${today}.${ext}`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+
+    if(ext==='mp4'){
+      voiceStatus.textContent=`✓ mp4 다운로드 (${Math.round(finalBlob.size/1024)}KB, ${duration.toFixed(1)}초). 카톡에서 자동 재생됩니다.`;
+      flashStatus('action-status','🎬 mp4 다운로드 완료 — 카톡 inline 재생');
+    } else {
+      voiceStatus.textContent=`⚠️ 서버 변환 실패해서 webm 다운로드 (${Math.round(finalBlob.size/1024)}KB). 카톡에선 클릭해서 재생.`;
+      flashStatus('action-status','webm 다운로드 (mp4 변환 실패)',true);
+    }
+  }catch(err){
+    voiceStatus.textContent='합성 실패: '+(err.message||err);
+    voiceStatus.style.color='#b85a3f';
+  }finally{
+    voiceDownload.disabled=false;
+    voiceDownload.textContent=origText;
+  }
+});
+
+// 펜팔 부치기 (현재 단계: LocalStorage에 본인 부친 편지 기록 + 펜팔 페이지에서 확인)
+// 다음 단계: Firebase·Supabase 등 실제 백엔드 연결 시 다른 사람도 볼 수 있게 확장 예정.
+const PENPAL_NICKS = ['새벽','노을','구름','이슬','바람','풀잎','조약돌','파도'];
+document.getElementById('penpal-send').addEventListener('click',()=>{
+  const msg=document.getElementById('message').value.trim();
+  if(!msg){
+    flashStatus('penpal-status','메시지를 먼저 작성하세요',true);
+    return;
+  }
+  // 카드 PNG도 함께 보존 (Base64 dataURL)
+  const canvas=document.getElementById('card');
+  const dataUrl=canvas.toDataURL('image/png');
+  const sent=JSON.parse(localStorage.getItem('morning-mom-penpal-sent')||'[]');
+  const nick=PENPAL_NICKS[Math.floor(Math.random()*PENPAL_NICKS.length)];
+  sent.push({
+    msg,
+    nick,
+    date:new Date().toISOString().slice(0,10),
+    topic:'그리운 사람',
+    dataUrl,
+  });
+  localStorage.setItem('morning-mom-penpal-sent',JSON.stringify(sent));
+  flashStatus('penpal-status',`📮 익명 '${nick}'으로 사서함에 부쳤어요. 펜팔 페이지에서 확인하세요 →`);
+});
+
+document.getElementById('photo-upload').addEventListener('change',async(e)=>{
+  const file=e.target.files[0];
+  if(!file) return;
+  const status=document.getElementById('photo-status');
+  status.textContent='로딩 중...';
+  try{
+    // createImageBitmap with imageOrientation='from-image' → EXIF 자동 회전
+    uploadedPhoto=await createImageBitmap(file,{imageOrientation:'from-image'});
+    status.textContent=`✓ ${file.name}`;
+    document.getElementById('polaroid-mode').checked=true;
+    drawCard();
+  }catch(err){
+    // fallback: FileReader + Image (EXIF 회전 없음)
+    try{
+      const url=URL.createObjectURL(file);
+      const img=new Image();
+      img.onload=()=>{
+        uploadedPhoto=img;
+        status.textContent=`✓ ${file.name} (회전 미적용)`;
+        document.getElementById('polaroid-mode').checked=true;
+        drawCard();
+      };
+      img.onerror=()=>{status.textContent='이미지 로드 실패'};
+      img.src=url;
+    }catch(e2){
+      status.textContent='이미지 로드 실패: '+err.message;
+    }
+  }
+});
+
+// ── 날씨 미리 fetch + UI 갱신 ─────────────
+(async()=>{
+  const w=await getWeather();
+  const el=document.getElementById('weather-hint');
+  if(el && w) el.textContent=`🌤️ 오늘 서울: ${w} — AI 제안에 자동 반영`;
+})();
+
+// ── 수신자 프로필 LocalStorage 저장 ─────────
+// 매번 다시 입력하는 불편 해소. 받는 사람·프로필·관계·성별·톤·폰트·테마까지 함께 보존.
+const PROFILE_KEY='morning-mom-recipient-profile';
+function saveProfile(){
+  const data={
+    recipient: document.getElementById('recipient').value,
+    profile: document.getElementById('profile').value,
+    tone: document.getElementById('tone').value,
+    relationship: document.getElementById('relationship').value,
+    gender: document.getElementById('gender').value,
+    font: document.querySelector('input[name="font"]:checked')?.value,
+    theme: document.querySelector('input[name="theme"]:checked')?.value,
+  };
+  localStorage.setItem(PROFILE_KEY, JSON.stringify(data));
+}
+function loadProfile(){
+  try{
+    const raw=localStorage.getItem(PROFILE_KEY);
+    if(!raw) return;
+    const d=JSON.parse(raw);
+    if(d.recipient!==undefined) document.getElementById('recipient').value=d.recipient;
+    if(d.profile!==undefined) document.getElementById('profile').value=d.profile;
+    if(d.tone) document.getElementById('tone').value=d.tone;
+    if(d.relationship) document.getElementById('relationship').value=d.relationship;
+    if(d.gender) document.getElementById('gender').value=d.gender;
+    if(d.font){
+      const r=document.querySelector(`input[name="font"][value="${d.font}"]`);
+      if(r) r.checked=true;
+    }
+    if(d.theme){
+      const r=document.querySelector(`input[name="theme"][value="${d.theme}"]`);
+      if(r) r.checked=true;
+    }
+  }catch(e){/* 무시 */}
+}
+// 페이지 로드 시 복원
+loadProfile();
+// 주요 input 변경 시 자동 저장
+['recipient','profile','tone','relationship','gender'].forEach(id=>{
+  document.getElementById(id).addEventListener('change',saveProfile);
+  document.getElementById(id).addEventListener('input',saveProfile);
+});
+document.querySelectorAll('input[name="font"], input[name="theme"]').forEach(r=>{
+  r.addEventListener('change',saveProfile);
+});
+
+// ── 갤러리 카드 수 표시 ─────────────────
+(async()=>{
+  try{
+    const res=await fetch('manifest.json?v='+Date.now());
+    if(!res.ok) return;
+    const items=await res.json();
+    const el=document.getElementById('gallery-count');
+    if(el) el.textContent=`(${items.length}장)`;
+  }catch(e){/* 카운트는 실패해도 무시 */}
+})();
+
+// ── URL 파라미터 pre-fill (갤러리 → 카드 만들기) ─
+(()=>{
+  const params=new URLSearchParams(location.search);
+  const msg=params.get('message');
+  const tone=params.get('tone');
+  let used=false;
+  if(msg){
+    document.getElementById('message').value=msg;
+    used=true;
+  }
+  if(tone && ['다정','위트','차분'].includes(tone)){
+    document.getElementById('tone').value=tone;
+    used=true;
+  }
+  if(used){
+    const notice=document.getElementById('from-gallery');
+    notice.hidden=false;
+    document.getElementById('from-gallery-close').addEventListener('click',()=>{
+      notice.hidden=true;
+    });
+  }
+})();
+
+// 폰트 명시적 preload — canvas는 CSS 사용 추적이 안 되므로
+// document.fonts.ready만으로는 lazy-load 폰트가 첫 그림 시 fallback될 수 있음
+async function preloadFonts(){
+  const specs=[
+    "400 102px Gaegu","700 102px Gaegu",
+    "400 72px 'Gowun Batang'","700 72px 'Gowun Batang'",
+    "400 120px 'Nanum Pen Script'",
+    "400 115px 'Nanum Brush Script'",
+    "400 95px 'Hi Melody'",
+  ];
+  await Promise.all(specs.map(s=>document.fonts.load(s).catch(()=>{})));
+}
+
+// 초기 렌더: preload 완료 후 한 번 더 그림 (이미 setTimeout으로 fallback도 보장)
+preloadFonts().then(drawCard);
+setTimeout(drawCard,100);
+setTimeout(drawCard,800);  // 폰트 다운로드 늦을 때 fallback
+</script>
+</body>
+</html>
