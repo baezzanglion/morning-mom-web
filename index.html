@@ -286,15 +286,20 @@
   }
   .carousel-wrap{
     position:relative;overflow:hidden;
-    border-radius:18px;
+    padding:0 8%;
   }
   .carousel-track{
     display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);
     will-change:transform;
   }
   .carousel-slide{
-    flex:0 0 100%;display:flex;flex-direction:column;align-items:center;
-    padding:8px 16px;
+    flex:0 0 84%;display:flex;flex-direction:column;align-items:center;
+    padding:8px 12px;
+    transition:opacity .4s ease,transform .4s ease;
+    opacity:.35;transform:scale(.92);
+  }
+  .carousel-slide.is-active{
+    opacity:1;transform:scale(1);
   }
   .carousel-slide img{
     width:100%;max-width:420px;height:auto;
@@ -305,6 +310,10 @@
     margin-top:18px;font-family:'Gaegu',cursive;font-weight:700;
     font-size:clamp(18px,2.2vw,22px);color:var(--accent-h);
     letter-spacing:-0.2px;text-align:center;line-height:1.4;
+  }
+  @media(max-width:560px){
+    .carousel-wrap{padding:0 5%}
+    .carousel-slide{flex:0 0 90%}
   }
   .carousel-dots{
     display:flex;justify-content:center;gap:8px;margin-top:24px;
@@ -478,8 +487,13 @@
   function go(i){
     idx=(i+total)%total;
     track.style.transform=`translateX(-${idx*100}%)`;
-    for(let k=0;k<total;k++)dots[k].classList.toggle('is-active',k===idx);
+    for(let k=0;k<total;k++){
+      dots[k].classList.toggle('is-active',k===idx);
+      slides[k].classList.toggle('is-active',k===idx);
+    }
   }
+  // 첫 슬라이드 강조
+  slides[0].classList.add('is-active');
   function next(){go(idx+1)}
   function start(){stop();timer=setInterval(next,INTERVAL)}
   function stop(){if(timer){clearInterval(timer);timer=null}}
