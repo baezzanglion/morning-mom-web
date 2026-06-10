@@ -278,6 +278,50 @@
   }
   .reflection p:first-child{margin-bottom:14px}
   .reflection-thanks{font-size:14px;opacity:.7}
+  .memory{margin:0 auto 80px;padding:0 16px;max-width:980px}
+  .memory .section-title{margin-bottom:20px}
+  .memory-sub{
+    text-align:center;color:var(--muted);font-size:14px;
+    margin-bottom:32px;letter-spacing:.2px;
+  }
+  .carousel-wrap{
+    position:relative;overflow:hidden;
+    border-radius:18px;
+  }
+  .carousel-track{
+    display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);
+    will-change:transform;
+  }
+  .carousel-slide{
+    flex:0 0 100%;display:flex;flex-direction:column;align-items:center;
+    padding:8px 16px;
+  }
+  .carousel-slide img{
+    width:100%;max-width:420px;height:auto;
+    border-radius:14px;display:block;
+    box-shadow:0 12px 36px rgba(60,50,45,.12);
+  }
+  .carousel-caption{
+    margin-top:18px;font-family:'Gaegu',cursive;font-weight:700;
+    font-size:clamp(18px,2.2vw,22px);color:var(--accent-h);
+    letter-spacing:-0.2px;text-align:center;line-height:1.4;
+  }
+  .carousel-dots{
+    display:flex;justify-content:center;gap:8px;margin-top:24px;
+  }
+  .carousel-dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--border);border:none;padding:0;cursor:pointer;
+    transition:.2s;margin:0;
+  }
+  .carousel-dot.is-active{
+    background:var(--accent);transform:scale(1.4);
+  }
+  .carousel-dot:hover{background:var(--accent-h)}
+  @media(min-width:760px){
+    .carousel-slide{padding:8px 60px}
+    .carousel-slide img{max-width:460px}
+  }
 </style>
 </head>
 <body>
@@ -352,6 +396,36 @@
     </div>
   </section>
 
+  <section class="memory" aria-label="그동안 가족에게 보낸 카드">
+    <h2 class="section-title">그동안 가족에게 보낸 카드</h2>
+    <p class="memory-sub">한 줄씩 쌓인 자국</p>
+    <div class="carousel-wrap">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-slide">
+          <img src="gallery/2026-05-24.jpeg" alt="첫 카드" loading="lazy">
+          <div class="carousel-caption">마음을 처음 꺼낸 날</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="gallery/2026-05-27.jpeg" alt="엄마의 손길" loading="lazy">
+          <div class="carousel-caption">엄마를 떠올린 아침</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="gallery/2026-05-29.jpeg" alt="햇빛 날씨" loading="lazy">
+          <div class="carousel-caption">서울 햇살을 함께</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="gallery/2026-05-31-wife-daughter.jpeg" alt="와이프가 딸에게" loading="lazy">
+          <div class="carousel-caption">와이프가 딸에게</div>
+        </div>
+        <div class="carousel-slide">
+          <img src="gallery/2026-05-31.png" alt="봄날" loading="lazy">
+          <div class="carousel-caption">엄마는 늘 봄날</div>
+        </div>
+      </div>
+    </div>
+    <div class="carousel-dots" id="carouselDots" aria-hidden="true"></div>
+  </section>
+
   <section class="cta-section">
     <p class="cta-prompt">오늘, 한 줄 꺼내볼까요?</p>
     <a href="create.html" class="cta-button">오늘 한 줄 꺼내보기 →</a>
@@ -379,6 +453,47 @@
     const el=document.getElementById('gallery-count');
     if(el&&cards.length)el.textContent=' · '+cards.length;
   }catch(e){}
+})();
+
+// 메모리 캐러셀 — 자동 슬라이드 + 호버 일시정지
+(()=>{
+  const track=document.getElementById('carouselTrack');
+  const dotsWrap=document.getElementById('carouselDots');
+  if(!track||!dotsWrap)return;
+  const slides=track.children;
+  const total=slides.length;
+  if(total<2)return;
+  let idx=0,timer=null;
+  const INTERVAL=4000;
+  // 점 생성
+  for(let i=0;i<total;i++){
+    const b=document.createElement('button');
+    b.className='carousel-dot'+(i===0?' is-active':'');
+    b.type='button';
+    b.setAttribute('aria-label',`카드 ${i+1}`);
+    b.addEventListener('click',()=>{go(i);restart()});
+    dotsWrap.appendChild(b);
+  }
+  const dots=dotsWrap.children;
+  function go(i){
+    idx=(i+total)%total;
+    track.style.transform=`translateX(-${idx*100}%)`;
+    for(let k=0;k<total;k++)dots[k].classList.toggle('is-active',k===idx);
+  }
+  function next(){go(idx+1)}
+  function start(){stop();timer=setInterval(next,INTERVAL)}
+  function stop(){if(timer){clearInterval(timer);timer=null}}
+  function restart(){stop();start()}
+  const wrap=track.parentElement;
+  wrap.addEventListener('mouseenter',stop);
+  wrap.addEventListener('mouseleave',start);
+  // viewport 진입 시 시작
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(e=>e.isIntersecting?start():stop());
+    },{threshold:.3});
+    io.observe(wrap);
+  }else start();
 })();
 </script>
 </body>
