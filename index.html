@@ -1,514 +1,805 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>따뜻한 메시지 카드 · morning-mom</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Hi+Melody&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#faf6f0;--card:#fff;--fg:#3c322d;--muted:#8a7a6f;
-    --accent:#aa827d;--accent-h:#8b6560;--border:#ece2d5;--warm:#fdf8f3;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    background:var(--bg);color:var(--fg);
-    font-family:'Gowun Batang','Apple SD Gothic Neo',sans-serif;
-    line-height:1.55;padding:32px 16px;
-  }
-  .container{max-width:1280px;margin:0 auto}
-  header{text-align:center;margin-bottom:32px}
-  header.hero{margin:32px 0 72px;padding:0 16px}
-  h1{
-    font-family:'Gaegu',cursive;font-weight:700;
-    font-size:clamp(34px,4.8vw,56px);
-    color:var(--accent-h);letter-spacing:-0.5px;line-height:1.2;
-  }
-  .hero-em{
-    font-family:'Gaegu',cursive;font-weight:700;
-    font-size:clamp(32px,4.4vw,52px);
-    color:var(--accent);letter-spacing:-0.5px;line-height:1.2;
-    margin-top:6px;
-  }
-  .subtitle{
-    color:var(--muted);font-size:15px;margin-top:28px;
-    letter-spacing:.2px;line-height:1.6;
-  }
-  .top-nav{
-    display:flex;justify-content:flex-end;gap:6px;
-    margin-bottom:0;font-size:13px;
-  }
-  .top-nav a{
-    color:var(--muted);text-decoration:none;
-    padding:6px 12px;border-radius:999px;transition:.15s;
-  }
-  .top-nav a:hover{background:var(--warm);color:var(--accent-h)}
-  .top-nav #gallery-count{margin-left:4px;opacity:.6;font-size:12px}
-  .layout{display:grid;grid-template-columns:1fr 1fr;gap:28px}
-  @media(max-width:900px){.layout{grid-template-columns:1fr}}
-  .panel{
-    background:var(--card);border:1px solid var(--border);
-    border-radius:16px;padding:24px;
-  }
-  label{
-    display:block;font-size:13px;color:var(--muted);
-    margin-bottom:6px;margin-top:18px;font-weight:600;
-  }
-  label:first-child,fieldset label{margin-top:0}
-  input[type=text],input[type=password],textarea,select{
-    width:100%;padding:10px 12px;border:1px solid var(--border);
-    border-radius:8px;font-family:inherit;font-size:14px;
-    background:#fdfaf6;color:var(--fg);outline:none;
-  }
-  input:focus,textarea:focus,select:focus{border-color:var(--accent)}
-  textarea{min-height:60px;resize:vertical}
-  #message{font-family:'Gaegu',cursive;font-size:19px;min-height:110px;line-height:1.6}
-  small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-  fieldset{border:none;display:flex;gap:18px;margin-top:4px}
-  fieldset label{
-    display:flex;align-items:center;gap:6px;margin:0;
-    font-size:14px;color:var(--fg);cursor:pointer;font-weight:400;
-  }
-  button{
-    margin-top:16px;padding:11px 18px;background:var(--accent);
-    color:#fff;border:none;border-radius:8px;font-family:inherit;
-    font-size:14px;font-weight:600;cursor:pointer;transition:.15s;
-  }
-  button:hover{background:var(--accent-h)}
-  button:disabled{opacity:.5;cursor:not-allowed}
-  button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
-  button.ghost:hover{background:var(--warm)}
-  .row{display:flex;gap:8px;flex-wrap:wrap}
-  .row button{flex:1;min-width:120px}
-  canvas{
-    width:100%;height:auto;border-radius:12px;display:block;
-    box-shadow:0 8px 32px rgba(60,50,45,.08);
-  }
-  #suggestions{
-    margin-top:16px;padding-top:16px;border-top:1px solid var(--border);
-  }
-  #suggestions h3{
-    font-size:13px;color:var(--muted);margin-bottom:10px;
-    font-weight:600;text-transform:uppercase;letter-spacing:.5px;
-  }
-  .sugg{
-    background:var(--warm);border:1px solid var(--border);
-    border-radius:8px;padding:14px;margin-bottom:8px;
-  }
-  .sugg pre{
-    font-family:'Gaegu',cursive;font-size:18px;white-space:pre-wrap;
-    color:var(--fg);margin-bottom:10px;line-height:1.5;
-  }
-  .sugg button{margin-top:0;padding:6px 12px;font-size:13px}
-  details{
-    margin-top:24px;padding:14px 16px;background:var(--warm);
-    border:1px solid var(--border);border-radius:8px;
-  }
-  summary{cursor:pointer;font-size:13px;color:var(--muted);font-weight:600}
-  details[open] summary{margin-bottom:12px}
-  details p{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
-  .warn{font-size:12px;color:#b85a3f;margin-top:6px;font-weight:600}
-  .status{font-size:13px;color:var(--muted);margin-top:8px;min-height:18px}
-  .preview-wrap{position:sticky;top:24px}
-  .gallery-btn{
-    display:inline-flex;align-items:center;gap:8px;
-    margin-top:14px;padding:10px 18px;
-    background:var(--warm);border:1px solid var(--accent);
-    border-radius:999px;color:var(--accent-h);
-    font-size:14px;font-weight:600;text-decoration:none;
-    transition:.15s;
-  }
-  .gallery-btn:hover{background:var(--accent);color:#fff}
-  .gallery-cta{
-    display:block;text-align:center;margin-top:14px;
-    padding:10px;background:var(--warm);
-    border:1px dashed var(--border);border-radius:8px;
-    color:var(--accent-h);text-decoration:none;font-size:13px;
-  }
-  .gallery-cta:hover{background:#f5ebdf}
-  .penpal-btn{
-    display:inline-flex;align-items:center;gap:8px;
-    margin-top:14px;margin-left:8px;padding:10px 18px;
-    background:#f3eef9;border:1px solid #a890d4;
-    border-radius:999px;color:#6a4fa3;
-    font-size:14px;font-weight:600;text-decoration:none;
-    transition:.15s;
-  }
-  .penpal-btn:hover{background:#a890d4;color:#fff}
-  .journey{
-    display:flex;align-items:stretch;justify-content:center;
-    gap:10px;margin:0 auto 64px;max-width:880px;
-    flex-wrap:wrap;padding:0 16px;
-  }
-  .journey-step{
-    background:#fff;border:1px solid var(--border);
-    border-radius:14px;padding:22px 20px;text-align:center;
-    flex:1;min-width:180px;max-width:240px;
-    display:flex;flex-direction:column;justify-content:center;
-  }
-  .journey-step.is-target{
-    border-color:var(--accent);
-    background:linear-gradient(180deg,#fff 0%,var(--warm) 100%);
-    box-shadow:0 6px 20px rgba(170,130,125,.14);
-  }
-  .journey-icon{font-size:32px;margin-bottom:8px;line-height:1}
-  .journey-stage{
-    font-family:'Gaegu',cursive;font-weight:700;
-    font-size:20px;color:var(--accent-h);margin-bottom:6px;
-    line-height:1.2;
-  }
-  .journey-feel{
-    color:var(--muted);font-size:13px;line-height:1.5;
-  }
-  .journey-arrow{
-    color:var(--border);font-size:22px;font-weight:300;
-    display:flex;align-items:center;
-  }
-  @media(max-width:700px){
-    .journey{flex-direction:column;gap:12px}
-    .journey-step{width:100%;max-width:none}
-    .journey-arrow{transform:rotate(90deg);font-size:18px;justify-content:center}
-  }
-  .from-gallery{
-    margin-bottom:18px;padding:10px 14px;
-    background:#fdf4e8;border:1px solid #e8d4b8;
-    border-radius:8px;font-size:13px;color:var(--accent-h);
-    display:flex;justify-content:space-between;align-items:center;gap:10px;
-  }
-  .from-gallery button{
-    margin:0;padding:4px 10px;font-size:12px;
-    background:transparent;color:var(--muted);border:none;
-  }
-  .from-gallery button:hover{background:transparent;color:var(--fg)}
-  .font-grid{flex-wrap:wrap;gap:12px}
-  .font-grid label{padding:6px 10px;border:1px solid var(--border);border-radius:8px;background:var(--warm)}
-  .font-grid label:has(input:checked){border-color:var(--accent);background:#fff}
-  .theme-grid{flex-wrap:wrap;gap:12px;margin-bottom:8px}
-  .theme-chips{
-    display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;
-  }
-  .chip{
-    display:inline-flex;align-items:center;gap:6px;
-    padding:6px 12px 6px 6px;border:1px solid var(--border);
-    border-radius:999px;background:var(--warm);cursor:pointer;
-    font-size:13px;
-  }
-  .chip:has(input:checked){border-color:var(--accent);background:#fff;box-shadow:0 0 0 2px rgba(170,130,125,0.18)}
-  .chip input{display:none}
-  .chip-swatch{
-    width:22px;height:22px;border-radius:50%;border:1px solid var(--border);
-    display:inline-block;
-  }
-  .custom-colors{
-    display:flex;gap:18px;margin-top:8px;padding:10px;
-    background:var(--warm);border:1px solid var(--border);border-radius:8px;
-  }
-  .color-row{
-    display:flex;align-items:center;gap:8px;margin:0;
-    font-size:13px;color:var(--fg);font-weight:600;
-  }
-  .color-row input[type=color]{
-    width:48px;height:32px;padding:0;border:1px solid var(--border);
-    border-radius:6px;background:none;cursor:pointer;
-  }
-  .polaroid-row{
-    display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px;
-  }
-  .voice-row{
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;
-  }
-  .toggle{
-    display:flex;align-items:center;gap:6px;margin:0;font-size:14px;cursor:pointer;
-  }
-  footer{
-    text-align:center;color:var(--muted);font-size:12px;
-    margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
-  }
-  footer a{color:var(--accent-h)}
-  .section-title{
-    text-align:center;font-family:'Gaegu',cursive;font-weight:700;
-    font-size:clamp(24px,3vw,32px);color:var(--accent-h);
-    margin:0 auto 28px;letter-spacing:-0.3px;
-  }
-  .diffs{margin:0 auto 72px;max-width:880px;padding:0 16px}
-  .diffs-grid{
-    display:grid;grid-template-columns:repeat(2,1fr);gap:14px;
-  }
-  @media(max-width:640px){.diffs-grid{grid-template-columns:1fr}}
-  .diff-card{
-    background:#fff;border:1px solid var(--border);
-    border-radius:14px;padding:24px 22px;text-align:center;
-  }
-  .diff-old{color:var(--muted);font-size:14px;line-height:1.55}
-  .diff-arrow{
-    color:var(--accent);font-size:18px;margin:12px 0;
-    font-weight:300;opacity:.6;
-  }
-  .diff-new{
-    font-family:'Gaegu',cursive;font-weight:700;font-size:19px;
-    color:var(--accent-h);line-height:1.4;
-  }
-  .cta-section{
-    text-align:center;margin:0 auto 88px;padding:0 16px;
-  }
-  .cta-prompt{
-    font-family:'Gaegu',cursive;font-weight:700;
-    font-size:clamp(22px,2.8vw,30px);color:var(--accent-h);
-    margin-bottom:24px;letter-spacing:-0.3px;
-  }
-  .cta-button{
-    display:inline-block;padding:16px 36px;
-    background:var(--accent);color:#fff;
-    border-radius:999px;font-family:inherit;
-    font-size:16px;font-weight:600;
-    text-decoration:none;letter-spacing:.3px;
-    box-shadow:0 6px 20px rgba(170,130,125,.25);
-    transition:.18s;
-  }
-  .cta-button:hover{
-    background:var(--accent-h);transform:translateY(-2px);
-    box-shadow:0 8px 24px rgba(170,130,125,.32);
-  }
-  .reflection{
-    text-align:center;margin:0 auto 56px;padding:36px 16px;
-    max-width:560px;color:var(--muted);
-    font-family:'Gowun Batang',serif;font-size:15px;line-height:1.95;
-  }
-  .reflection p:first-child{margin-bottom:14px}
-  .reflection-thanks{font-size:14px;opacity:.7}
-  .memory{margin:0 auto 80px;padding:0 16px;max-width:980px}
-  .memory .section-title{margin-bottom:20px}
-  .memory-sub{
-    text-align:center;color:var(--muted);font-size:14px;
-    margin-bottom:32px;letter-spacing:.2px;
-  }
-  .carousel-wrap{
-    position:relative;overflow:hidden;
-    padding:0 8%;
-  }
-  .carousel-track{
-    display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1);
-    will-change:transform;
-  }
-  .carousel-slide{
-    flex:0 0 84%;display:flex;flex-direction:column;align-items:center;
-    padding:8px 12px;
-    transition:opacity .4s ease,transform .4s ease;
-    opacity:.35;transform:scale(.92);
-  }
-  .carousel-slide.is-active{
-    opacity:1;transform:scale(1);
-  }
-  .carousel-slide img{
-    width:100%;max-width:420px;height:auto;
-    border-radius:14px;display:block;
-    box-shadow:0 12px 36px rgba(60,50,45,.12);
-  }
-  .carousel-caption{
-    margin-top:18px;font-family:'Gaegu',cursive;font-weight:700;
-    font-size:clamp(18px,2.2vw,22px);color:var(--accent-h);
-    letter-spacing:-0.2px;text-align:center;line-height:1.4;
-  }
-  @media(max-width:560px){
-    .carousel-wrap{padding:0 5%}
-    .carousel-slide{flex:0 0 90%}
-  }
-  .carousel-dots{
-    display:flex;justify-content:center;gap:8px;margin-top:24px;
-  }
-  .carousel-dot{
-    width:8px;height:8px;border-radius:50%;
-    background:var(--border);border:none;padding:0;cursor:pointer;
-    transition:.2s;margin:0;
-  }
-  .carousel-dot.is-active{
-    background:var(--accent);transform:scale(1.4);
-  }
-  .carousel-dot:hover{background:var(--accent-h)}
-  @media(min-width:760px){
-    .carousel-slide{padding:8px 60px}
-    .carousel-slide img{max-width:460px}
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ON마음 — 마음이 없어서가 아니라, 켜는 게 어려웠을 뿐</title>
+  <meta name="description" content="소중한 사람에게 손글씨 느낌의 카드로 마음을 전하는 서비스, ON마음. 마음은 늘 있어요, 꺼내는 게 힘든 거죠. 한 줄이면 충분해요." />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ON마음 — 한 줄이면 충분해요" />
+  <meta property="og:description" content="마음이 없어서가 아니라, 켜는 게 어려웠을 뿐. 오늘 한 줄 꺼내보기." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fonts: Pretendard (본문) + Nanum Pen Script (손글씨 감성 accent) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ===== Design tokens ===== */
+    :root {
+      --terracotta: #D2674A;
+      --terracotta-deep: #B5503A;
+      --soft-rose: #F5E0DC;
+      --rose-tint: #FBEEEA;
+      --plum: #5A2E3E;
+      --plum-soft: #7A5562;
+      --warm-white: #FDFBF9;
+
+      --maxw: 1080px;
+      --radius: 22px;
+      --radius-lg: 30px;
+      --shadow-sm: 0 6px 20px rgba(90, 46, 62, 0.06);
+      --shadow-md: 0 16px 40px rgba(90, 46, 62, 0.10);
+      --shadow-lg: 0 24px 60px rgba(90, 46, 62, 0.14);
+
+      --font: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, 'Apple SD Gothic Neo', sans-serif;
+      --hand: 'Nanum Pen Script', 'Pretendard', cursive;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+
+    body {
+      font-family: var(--font);
+      color: var(--plum);
+      background-color: var(--warm-white);
+      /* 아주 옅은 종이 질감 — 따뜻한 무드, 차가운 느낌 방지 */
+      background-image: radial-gradient(120% 90% at 50% -10%, var(--rose-tint) 0%, var(--warm-white) 46%);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+
+    .wrap {
+      width: 100%;
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 0 22px;
+    }
+
+    section { position: relative; }
+
+    .eyebrow {
+      font-family: var(--hand);
+      font-size: 1.7rem;
+      color: var(--terracotta);
+      line-height: 1;
+      margin-bottom: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .section-title {
+      font-size: clamp(1.55rem, 5vw, 2.4rem);
+      font-weight: 800;
+      color: var(--plum);
+      letter-spacing: -0.02em;
+      line-height: 1.32;
+    }
+
+    .section-head {
+      text-align: center;
+      margin-bottom: clamp(2.2rem, 5vw, 3.4rem);
+    }
+
+    .pad {
+      padding-top: clamp(4rem, 9vw, 6.8rem);
+      padding-bottom: clamp(4rem, 9vw, 6.8rem);
+    }
+
+    /* ===== Buttons ===== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: var(--font);
+      font-weight: 700;
+      font-size: 1.06rem;
+      color: #fff;
+      background: var(--terracotta);
+      border: none;
+      cursor: pointer;
+      padding: 16px 30px;
+      border-radius: 999px;
+      box-shadow: 0 10px 24px rgba(210, 103, 74, 0.32);
+      transition: transform .22s ease, box-shadow .22s ease, background .22s ease;
+      will-change: transform;
+    }
+    .btn:hover {
+      background: var(--terracotta-deep);
+      transform: translateY(-3px);
+      box-shadow: 0 16px 32px rgba(210, 103, 74, 0.40);
+    }
+    .btn:active { transform: translateY(-1px); }
+    .btn .arrow { transition: transform .22s ease; }
+    .btn:hover .arrow { transform: translateX(4px); }
+
+    .btn-lg { font-size: 1.18rem; padding: 19px 38px; }
+
+    :focus-visible { outline: 3px solid var(--terracotta); outline-offset: 3px; border-radius: 6px; }
+
+    /* ===== Header ===== */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(253, 251, 249, 0.78);
+      backdrop-filter: saturate(160%) blur(12px);
+      -webkit-backdrop-filter: saturate(160%) blur(12px);
+      border-bottom: 1px solid transparent;
+      transition: border-color .25s ease, box-shadow .25s ease, background .25s ease;
+    }
+    header.scrolled {
+      border-bottom-color: rgba(90, 46, 62, 0.08);
+      box-shadow: 0 6px 20px rgba(90, 46, 62, 0.05);
+    }
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+    }
+    .logo {
+      font-size: 1.42rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--plum);
+    }
+    .logo .on {
+      color: var(--terracotta);
+      position: relative;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-links a.text-link {
+      padding: 9px 14px;
+      font-weight: 600;
+      font-size: 0.98rem;
+      color: var(--plum-soft);
+      border-radius: 999px;
+      transition: color .2s ease, background .2s ease;
+    }
+    .nav-links a.text-link:hover { color: var(--plum); background: var(--rose-tint); }
+    .nav-pill {
+      padding: 10px 18px;
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: #fff;
+      background: var(--terracotta);
+      border-radius: 999px;
+      box-shadow: 0 6px 16px rgba(210, 103, 74, 0.28);
+      transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+    .nav-pill:hover { background: var(--terracotta-deep); transform: translateY(-2px); }
+
+    /* ===== Hero ===== */
+    .hero {
+      position: relative;
+      text-align: center;
+      padding-top: clamp(3rem, 8vw, 5.2rem);
+      padding-bottom: clamp(3.5rem, 9vw, 6rem);
+      overflow: hidden;
+    }
+    /* 따뜻한 소프트로즈 blob 배경 */
+    .hero::before,
+    .hero::after {
+      content: "";
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      z-index: 0;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+    .hero::before {
+      width: 420px; height: 420px;
+      background: var(--soft-rose);
+      top: -120px; left: -120px;
+    }
+    .hero::after {
+      width: 360px; height: 360px;
+      background: rgba(210, 103, 74, 0.14);
+      bottom: -140px; right: -100px;
+    }
+    .hero .wrap { position: relative; z-index: 1; }
+
+    .hero-eyebrow {
+      font-family: var(--hand);
+      font-size: 1.9rem;
+      color: var(--terracotta);
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: clamp(2.1rem, 8.2vw, 4rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.28;
+      color: var(--plum);
+      margin-bottom: 22px;
+    }
+    .hero p.sub {
+      font-size: clamp(1.04rem, 3.4vw, 1.28rem);
+      color: var(--plum-soft);
+      font-weight: 500;
+      margin-bottom: 34px;
+    }
+
+    /* 손글씨 카드 일러스트 (이미지 없이 CSS로) */
+    .hero-card {
+      margin: clamp(2.6rem, 7vw, 4rem) auto 0;
+      width: min(330px, 82vw);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: var(--shadow-lg);
+      padding: 30px 28px 26px;
+      text-align: left;
+      transform: rotate(-2.2deg);
+      position: relative;
+    }
+    .hero-card .tape {
+      position: absolute;
+      top: -13px; left: 50%;
+      transform: translateX(-50%) rotate(-1.5deg);
+      width: 96px; height: 26px;
+      background: rgba(210, 103, 74, 0.22);
+      border-radius: 3px;
+    }
+    .hero-card .to {
+      font-family: var(--hand);
+      font-size: 1.5rem;
+      color: var(--plum-soft);
+      margin-bottom: 14px;
+    }
+    .hero-card .line {
+      height: 11px;
+      border-radius: 6px;
+      background: var(--rose-tint);
+      margin-bottom: 13px;
+    }
+    .hero-card .line.w1 { width: 92%; }
+    .hero-card .line.w2 { width: 78%; }
+    .hero-card .line.w3 { width: 86%; background: var(--soft-rose); }
+    .hero-card .sign {
+      font-family: var(--hand);
+      font-size: 1.5rem;
+      color: var(--terracotta);
+      text-align: right;
+      margin-top: 18px;
+    }
+    .hero-card .heart {
+      position: absolute;
+      right: 22px; bottom: 18px;
+      color: var(--terracotta);
+      font-size: 1.1rem;
+    }
+
+    /* ===== Empathy ===== */
+    .empathy { background: var(--warm-white); }
+    .empathy-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .ecard {
+      background: #fff;
+      border: 1px solid rgba(90, 46, 62, 0.06);
+      border-radius: var(--radius);
+      padding: 26px 24px;
+      box-shadow: var(--shadow-sm);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .ecard:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .ecard .icon {
+      width: 54px; height: 54px;
+      display: grid; place-items: center;
+      font-size: 1.6rem;
+      background: var(--rose-tint);
+      border-radius: 16px;
+      margin-bottom: 16px;
+    }
+    .ecard .pain {
+      color: var(--plum-soft);
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .ecard .sol {
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+      color: var(--plum);
+      font-size: 1.12rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.5;
+    }
+    .ecard .sol .tri { color: var(--terracotta); flex: none; line-height: 1.5; }
+
+    /* ===== Growth ===== */
+    .growth { background: var(--rose-tint); }
+    .growth-steps {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      position: relative;
+    }
+    .step {
+      background: var(--warm-white);
+      border-radius: var(--radius);
+      padding: 30px 26px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      z-index: 1;
+    }
+    .step .emoji { font-size: 2.6rem; line-height: 1; margin-bottom: 14px; }
+    .step .freq {
+      display: inline-block;
+      font-weight: 800;
+      color: var(--terracotta);
+      font-size: 1.18rem;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+    .step .desc { color: var(--plum-soft); font-size: 1.02rem; font-weight: 500; }
+    .step .num {
+      position: absolute;
+      top: 16px; right: 20px;
+      font-family: var(--hand);
+      font-size: 1.7rem;
+      color: var(--soft-rose);
+    }
+
+    /* ===== Value ===== */
+    .value { background: var(--warm-white); }
+    .value-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+    }
+    .vcard {
+      border-radius: var(--radius-lg);
+      padding: 38px 32px;
+      background: linear-gradient(160deg, #fff 0%, var(--rose-tint) 100%);
+      border: 1px solid rgba(210, 103, 74, 0.10);
+      box-shadow: var(--shadow-sm);
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .vcard:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .vcard .vicon {
+      width: 60px; height: 60px;
+      display: grid; place-items: center;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+    .vcard .vicon svg { width: 30px; height: 30px; stroke: var(--terracotta); }
+    .vcard h3 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--plum);
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    .vcard p { color: var(--plum-soft); font-size: 1.08rem; font-weight: 500; }
+
+    /* ===== Gallery (강조 섹션) ===== */
+    .gallery { background: linear-gradient(180deg, var(--soft-rose) 0%, var(--rose-tint) 100%); }
+    .gallery .section-head .section-title { font-size: clamp(1.7rem, 5.4vw, 2.6rem); }
+    .gallery-sub {
+      font-family: var(--hand);
+      font-size: 1.75rem;
+      color: var(--terracotta);
+      margin-top: 6px;
+    }
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .gitem { text-align: center; }
+    .gframe {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--shadow-md);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      transition: transform .25s ease, box-shadow .25s ease;
+    }
+    .gitem:nth-child(odd) .gframe { transform: rotate(-1.4deg); }
+    .gitem:nth-child(even) .gframe { transform: rotate(1.4deg); }
+    .gitem:hover .gframe { transform: rotate(0deg) translateY(-4px); box-shadow: var(--shadow-lg); }
+    .gframe .tape {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 74px; height: 20px;
+      background: rgba(210, 103, 74, 0.20);
+      border-radius: 3px;
+      z-index: 2;
+    }
+    /* 이미지 자리 placeholder — 사용자가 직접 업로드 */
+    .gframe .ph {
+      display: grid;
+      place-items: center;
+      gap: 8px;
+      color: var(--plum-soft);
+      opacity: 0.55;
+      padding: 16px;
+      text-align: center;
+    }
+    .gframe .ph svg { width: 38px; height: 38px; stroke: var(--plum-soft); }
+    .gframe .ph span { font-size: 0.84rem; font-weight: 600; }
+    .gframe img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gitem .cap {
+      font-family: var(--hand);
+      font-size: 1.4rem;
+      color: var(--plum);
+      margin-top: 12px;
+      line-height: 1.2;
+    }
+    .gallery-note {
+      text-align: center;
+      margin-top: 26px;
+      font-size: 0.92rem;
+      color: var(--plum-soft);
+      opacity: 0.8;
+    }
+
+    /* ===== CTA band ===== */
+    .cta-band { background: var(--soft-rose); text-align: center; }
+    .cta-band h2 {
+      font-size: clamp(1.7rem, 5.6vw, 2.6rem);
+      font-weight: 800;
+      color: var(--plum);
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+      line-height: 1.3;
+    }
+
+    /* ===== Closing ===== */
+    .closing { background: var(--warm-white); text-align: center; }
+    .closing .heart-top { font-size: 1.6rem; color: var(--terracotta); margin-bottom: 20px; }
+    .closing p {
+      font-size: clamp(1.3rem, 4.6vw, 1.9rem);
+      font-weight: 700;
+      color: var(--plum);
+      line-height: 1.7;
+      letter-spacing: -0.01em;
+    }
+    .closing .thanks {
+      font-family: var(--hand);
+      font-size: clamp(2rem, 6vw, 2.8rem);
+      color: var(--terracotta);
+      margin-top: 26px;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background: var(--plum);
+      color: var(--warm-white);
+      text-align: center;
+      padding: 44px 22px 40px;
+    }
+    footer .f-logo { font-size: 1.3rem; font-weight: 800; margin-bottom: 12px; }
+    footer .f-logo .on { color: var(--terracotta); }
+    footer .f-tag { font-size: 0.98rem; opacity: 0.82; margin-bottom: 22px; font-weight: 400; }
+    footer .socials { display: flex; gap: 14px; justify-content: center; margin-bottom: 22px; }
+    footer .socials a {
+      width: 42px; height: 42px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: rgba(253, 251, 249, 0.12);
+      transition: background .2s ease, transform .2s ease;
+    }
+    footer .socials a:hover { background: rgba(253, 251, 249, 0.22); transform: translateY(-2px); }
+    footer .socials svg { width: 20px; height: 20px; stroke: var(--warm-white); }
+    footer .copy { font-size: 0.82rem; opacity: 0.6; }
+
+    /* ===== Scroll reveal ===== */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+    }
+    .reveal.in { opacity: 1; transform: none; }
+    /* 그리드 아이템 stagger */
+    .stagger > *.reveal { transition-delay: calc(var(--i, 0) * 90ms); }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .hero-card { animation: none; }
+      * { animation: none !important; }
+    }
+
+    /* ===== Responsive ===== */
+    @media (min-width: 640px) {
+      .empathy-grid { grid-template-columns: 1fr 1fr; }
+      .value-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (min-width: 880px) {
+      .growth-steps { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+      /* 단계 사이 점선 연결 */
+      .growth-steps::before {
+        content: "";
+        position: absolute;
+        top: 50%; left: 8%; right: 8%;
+        border-top: 2px dashed rgba(210, 103, 74, 0.35);
+        z-index: 0;
+      }
+      .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+    }
+
+    /* float anim for hero card */
+    @keyframes floaty {
+      0%, 100% { transform: rotate(-2.2deg) translateY(0); }
+      50% { transform: rotate(-2.2deg) translateY(-10px); }
+    }
+    .hero-card { animation: floaty 5.5s ease-in-out infinite; }
+  </style>
 </head>
 <body>
-<!-- 폰트 글리프 강제 preloader — canvas는 fonts.ready 추적 사각지대라
-     hidden 한국어 글리프를 실제로 그려서 브라우저가 폰트를 실로드하게 함 -->
-<div aria-hidden="true" style="position:absolute;visibility:hidden;height:0;overflow:hidden;left:-9999px;top:-9999px">
-  <span style="font-family:'Gaegu',cursive;font-weight:400">가나다라마바사아자차카타파하 1234567890 ABC</span>
-  <span style="font-family:'Gaegu',cursive;font-weight:700">가나다라마바사아자차카타파하 1234567890 ABC</span>
-  <span style="font-family:'Gowun Batang',serif;font-weight:400">가나다라마바사아자차카타파하 1234567890 ABC</span>
-  <span style="font-family:'Gowun Batang',serif;font-weight:700">가나다라마바사아자차카타파하 1234567890 ABC</span>
-  <span style="font-family:'Nanum Pen Script',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
-  <span style="font-family:'Nanum Brush Script',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
-  <span style="font-family:'Hi Melody',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
-</div>
 
-<div class="container">
-
-  <nav class="top-nav">
-    <a href="gallery.html" id="gallery-btn">📷 갤러리<span id="gallery-count"></span></a>
-    <a href="pen-pal.html" id="penpal-btn">📮 펜팔</a>
-  </nav>
-
-  <header class="hero">
-    <h1>마음은 늘 있어요.</h1>
-    <div class="hero-em">꺼내는 게 힘든 거죠.</div>
-    <p class="subtitle">사랑하는 가족에게 매일 한 줄 — 모닝맘</p>
+  <!-- ===== Header ===== -->
+  <header id="top">
+    <div class="wrap nav">
+      <a href="#top" class="logo" aria-label="ON마음 홈"><span class="on">ON</span>마음</a>
+      <nav class="nav-links" aria-label="주요 메뉴">
+        <a href="gallery.html" class="text-link">갤러리</a>
+        <a href="pen-pal.html" class="text-link">펜팔</a>
+        <a href="create.html" class="nav-pill">카드 만들기</a>
+      </nav>
+    </div>
   </header>
 
-  <section class="journey" aria-label="모닝맘과 함께하는 변화">
-    <div class="journey-step">
-      <div class="journey-icon">🌱</div>
-      <div class="journey-stage">한 달에 한 번</div>
-      <div class="journey-feel">할까 말까<br>망설이던 마음</div>
-    </div>
-    <div class="journey-arrow" aria-hidden="true">→</div>
-    <div class="journey-step">
-      <div class="journey-icon">🌿</div>
-      <div class="journey-stage">일주일에 2-3번</div>
-      <div class="journey-feel">꺼내기가<br>가벼워졌어요</div>
-    </div>
-    <div class="journey-arrow" aria-hidden="true">→</div>
-    <div class="journey-step is-target">
-      <div class="journey-icon">🌸</div>
-      <div class="journey-stage">매일 한 줄</div>
-      <div class="journey-feel">표현이<br>습관이 됐어요</div>
-    </div>
-  </section>
+  <main>
 
-  <section class="diffs" aria-label="모닝맘이 도와드리는 것">
-    <h2 class="section-title">이런 경험, 있으셨죠?</h2>
-    <div class="diffs-grid">
-      <div class="diff-card">
-        <div class="diff-old">길게 고민하다가<br>결국 못 보냈던 경험</div>
-        <div class="diff-arrow">↓</div>
-        <div class="diff-new">전달을<br>도와드려요</div>
-      </div>
-      <div class="diff-card">
-        <div class="diff-old">텍스트만으로는<br>충분하지 않았던 마음</div>
-        <div class="diff-arrow">↓</div>
-        <div class="diff-new">카드 · 사진 · 영상까지<br>한 흐름으로</div>
-      </div>
-      <div class="diff-card">
-        <div class="diff-old">매번 처음부터<br>다시 시작하는 피로</div>
-        <div class="diff-arrow">↓</div>
-        <div class="diff-new">받는 사람을<br>기억해드려요</div>
-      </div>
-      <div class="diff-card">
-        <div class="diff-old">뭐라고 써야 할지<br>모르겠는 막막함</div>
-        <div class="diff-arrow">↓</div>
-        <div class="diff-new">오늘 단서·날씨까지<br>알아서</div>
-      </div>
-    </div>
-  </section>
+    <!-- ===== Hero ===== -->
+    <section class="hero" aria-label="소개">
+      <div class="wrap">
+        <p class="hero-eyebrow reveal">마음을 켜다, ON마음</p>
+        <h1 class="reveal">마음은 늘 있어요.<br />꺼내는 게 힘든 거죠.</h1>
+        <p class="sub reveal">소중한 사람에게, 한 줄이면 충분해요 — ON마음</p>
+        <a href="create.html" class="btn btn-lg reveal">오늘 한 줄 꺼내보기 <span class="arrow" aria-hidden="true">→</span></a>
 
-  <section class="memory" aria-label="그동안 가족에게 보낸 카드">
-    <h2 class="section-title">그동안 가족에게 보낸 카드</h2>
-    <p class="memory-sub">한 줄씩 쌓인 자국</p>
-    <div class="carousel-wrap">
-      <div class="carousel-track" id="carouselTrack">
-        <div class="carousel-slide">
-          <img src="gallery/2026-05-24.jpeg" alt="첫 카드" loading="lazy">
-          <div class="carousel-caption">마음을 처음 꺼낸 날</div>
-        </div>
-        <div class="carousel-slide">
-          <img src="gallery/2026-05-27.jpeg" alt="엄마의 손길" loading="lazy">
-          <div class="carousel-caption">엄마를 떠올린 아침</div>
-        </div>
-        <div class="carousel-slide">
-          <img src="gallery/2026-05-29.jpeg" alt="햇빛 날씨" loading="lazy">
-          <div class="carousel-caption">서울 햇살을 함께</div>
-        </div>
-        <div class="carousel-slide">
-          <img src="gallery/2026-05-31-wife-daughter.jpeg" alt="와이프가 딸에게" loading="lazy">
-          <div class="carousel-caption">와이프가 딸에게</div>
-        </div>
-        <div class="carousel-slide">
-          <img src="gallery/2026-05-31.png" alt="봄날" loading="lazy">
-          <div class="carousel-caption">엄마는 늘 봄날</div>
+        <div class="hero-card reveal" aria-hidden="true">
+          <div class="tape"></div>
+          <div class="to">사랑하는 엄마에게,</div>
+          <div class="line w1"></div>
+          <div class="line w2"></div>
+          <div class="line w3"></div>
+          <div class="sign">— 막내가</div>
+          <div class="heart">♥</div>
         </div>
       </div>
-    </div>
-    <div class="carousel-dots" id="carouselDots" aria-hidden="true"></div>
-  </section>
+    </section>
 
-  <section class="cta-section">
-    <p class="cta-prompt">오늘, 한 줄 꺼내볼까요?</p>
-    <a href="create.html" class="cta-button">오늘 한 줄 꺼내보기 →</a>
-  </section>
+    <!-- ===== Empathy ===== -->
+    <section class="empathy pad" aria-label="공감">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">이런 경험, 있으셨죠?</p>
+          <h2 class="section-title">표현이 서툴렀던 건<br />당신 탓이 아니에요</h2>
+        </div>
 
-  <section class="reflection" aria-label="회고">
-    <p>당신이 보낸 따뜻한 마음이<br>누군가를 위로하고<br>하루를 살아내게 했어요.</p>
-    <p class="reflection-thanks">— 고맙습니다.</p>
-  </section>
+        <div class="empathy-grid stagger">
+          <article class="ecard reveal" style="--i:0">
+            <div class="icon" aria-hidden="true">💭</div>
+            <p class="pain">길게 고민하다 결국 못 보냈던 경험</p>
+            <p class="sol"><span class="tri" aria-hidden="true">→</span><span>켜기만 하면, 첫 문장을 꺼내드려요</span></p>
+          </article>
+          <article class="ecard reveal" style="--i:1">
+            <div class="icon" aria-hidden="true">💌</div>
+            <p class="pain">텍스트만으로는 충분하지 않았던 마음</p>
+            <p class="sol"><span class="tri" aria-hidden="true">→</span><span>카드·사진·영상까지 한 흐름으로</span></p>
+          </article>
+          <article class="ecard reveal" style="--i:2">
+            <div class="icon" aria-hidden="true">🔁</div>
+            <p class="pain">매번 처음부터 다시 시작하는 피로</p>
+            <p class="sol"><span class="tri" aria-hidden="true">→</span><span>받는 사람을 기억해드려요</span></p>
+          </article>
+          <article class="ecard reveal" style="--i:3">
+            <div class="icon" aria-hidden="true">🌫️</div>
+            <p class="pain">뭐라고 써야 할지 모르겠는 막막함</p>
+            <p class="sol"><span class="tri" aria-hidden="true">→</span><span>오늘의 단서·분위기까지 알아서</span></p>
+          </article>
+        </div>
+      </div>
+    </section>
 
+    <!-- ===== Growth ===== -->
+    <section class="growth pad" aria-label="성장 단계">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">표현이 습관이 되기까지</p>
+          <h2 class="section-title">한 줄씩, 마음이 가벼워져요</h2>
+        </div>
+
+        <div class="growth-steps stagger">
+          <div class="step reveal" style="--i:0">
+            <span class="num">01</span>
+            <div class="emoji" aria-hidden="true">🌱</div>
+            <span class="freq">한 달에 한 번</span>
+            <p class="desc">할까 말까 망설이던 마음</p>
+          </div>
+          <div class="step reveal" style="--i:1">
+            <span class="num">02</span>
+            <div class="emoji" aria-hidden="true">🌿</div>
+            <span class="freq">일주일에 2~3번</span>
+            <p class="desc">꺼내기가 가벼워졌어요</p>
+          </div>
+          <div class="step reveal" style="--i:2">
+            <span class="num">03</span>
+            <div class="emoji" aria-hidden="true">🌸</div>
+            <span class="freq">매일 한 줄</span>
+            <p class="desc">표현이 습관이 됐어요</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Value ===== -->
+    <section class="value pad" aria-label="가치">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">ON마음이 하는 일</p>
+          <h2 class="section-title">두 가지만 약속할게요</h2>
+        </div>
+
+        <div class="value-grid stagger">
+          <article class="vcard reveal" style="--i:0">
+            <div class="vicon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M13 2 4.5 13.5H11l-1 8L19.5 10H13l0-8Z" />
+              </svg>
+            </div>
+            <h3>켜다</h3>
+            <p>마음은 어렵지 않아요.<br />버튼 하나면 충분해요.</p>
+          </article>
+          <article class="vcard reveal" style="--i:1">
+            <div class="vicon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 21s-7.5-4.6-10-9.2C.4 8.6 2 5 5.5 5 8 5 9.5 7 12 9c2.5-2 4-4 6.5-4C22 5 23.6 8.6 22 11.8 19.5 16.4 12 21 12 21Z" />
+              </svg>
+            </div>
+            <h3>진심</h3>
+            <p>잘 쓴 글보다,<br />진짜 마음이 닿도록.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Gallery (강조) ===== -->
+    <section class="gallery pad" id="gallery" aria-label="갤러리">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">그동안 가족에게 보낸 카드</p>
+          <h2 class="section-title">한 줄씩 쌓인 자국</h2>
+          <p class="gallery-sub">마음은, 보낸 만큼 남아요</p>
+        </div>
+
+        <div class="gallery-grid stagger">
+          <figure class="gitem reveal" style="--i:0">
+            <div class="gframe">
+              <span class="tape"></span>
+              <img src="gallery/2026-05-24.jpeg" alt="엄마에게 첫 카드" loading="lazy">
+            </div>
+            <figcaption class="cap">마음을 처음 꺼낸 날</figcaption>
+          </figure>
+
+          <figure class="gitem reveal" style="--i:1">
+            <div class="gframe">
+              <span class="tape"></span>
+              <img src="gallery/2026-05-27.jpeg" alt="엄마의 손길" loading="lazy">
+            </div>
+            <figcaption class="cap">엄마를 떠올린 아침</figcaption>
+          </figure>
+
+          <figure class="gitem reveal" style="--i:2">
+            <div class="gframe">
+              <span class="tape"></span>
+              <img src="gallery/2026-05-29.jpeg" alt="햇빛 좋던 날" loading="lazy">
+            </div>
+            <figcaption class="cap">서울 햇살을 함께</figcaption>
+          </figure>
+
+          <figure class="gitem reveal" style="--i:3">
+            <div class="gframe">
+              <span class="tape"></span>
+              <img src="gallery/2026-05-31-wife-daughter.jpeg" alt="와이프가 딸에게" loading="lazy">
+            </div>
+            <figcaption class="cap">와이프가 딸에게</figcaption>
+          </figure>
+
+          <figure class="gitem reveal" style="--i:4">
+            <div class="gframe">
+              <span class="tape"></span>
+              <img src="gallery/2026-05-31.png" alt="봄날" loading="lazy">
+            </div>
+            <figcaption class="cap">엄마는 늘 봄날</figcaption>
+          </figure>
+
+          <figure class="gitem reveal" style="--i:5">
+            <div class="gframe">
+              <span class="tape"></span>
+              <img src="gallery/2026-05-31-polaroid-2.jpeg" alt="폴라로이드로" loading="lazy">
+            </div>
+            <figcaption class="cap">폴라로이드로도</figcaption>
+          </figure>
+        </div>
+
+        <p class="gallery-note reveal"><a href="gallery.html" style="color:var(--terracotta);font-weight:600;">→ 갤러리에서 전체 보기</a></p>
+      </div>
+    </section>
+
+    <!-- ===== CTA band ===== -->
+    <section class="cta-band pad" aria-label="카드 만들기">
+      <div class="wrap reveal">
+        <h2>오늘, 한 줄 꺼내볼까요?</h2>
+        <a href="create.html" class="btn btn-lg">오늘 한 줄 꺼내보기 <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+    </section>
+
+    <!-- ===== Closing ===== -->
+    <section class="closing pad" aria-label="마무리">
+      <div class="wrap reveal">
+        <div class="heart-top" aria-hidden="true">♥</div>
+        <p>당신이 보낸 따뜻한 마음이<br />누군가를 위로하고<br />하루를 살아내게 했어요.</p>
+        <p class="thanks">— 고맙습니다.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Footer ===== -->
   <footer>
-    <p>morning-mom · <a href="https://baezzanglion.github.io/morning-mom-web/" target="_blank" rel="noopener">스폰지클럽 5주차</a></p>
-    <p style="margin-top:4px">사랑하는 가족에게, 매일 한 줄</p>
+    <div class="f-logo"><span class="on">ON</span>마음</div>
+    <p class="f-tag">마음이 없어서가 아니라, 켜는 게 어려웠을 뿐</p>
+    <div class="socials">
+      <a href="https://www.instagram.com/p/DZSC7E8iTur/" target="_blank" rel="noopener" aria-label="인스타그램">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+      </a>
+    </div>
+    <p class="copy">© 2026 ON마음. 한 줄이면 충분해요.</p>
   </footer>
-</div>
 
-<script>
-// 갤러리 카운트만 — 폼 관련 JS는 create.html에 있음
-(async()=>{
-  try{
-    const res=await fetch('manifest.json?v='+Date.now());
-    if(!res.ok)return;
-    const data=await res.json();
-    const cards=(data.cards||[]).filter(c=>!c.id?.startsWith('penpal-'));
-    const el=document.getElementById('gallery-count');
-    if(el&&cards.length)el.textContent=' · '+cards.length;
-  }catch(e){}
-})();
+  <script>
+    // 헤더 스크롤 그림자
+    const header = document.getElementById('top');
+    const onScroll = () => header.classList.toggle('scrolled', window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
 
-// 메모리 캐러셀 — 자동 슬라이드 + 호버 일시정지
-(()=>{
-  const track=document.getElementById('carouselTrack');
-  const dotsWrap=document.getElementById('carouselDots');
-  if(!track||!dotsWrap)return;
-  const slides=track.children;
-  const total=slides.length;
-  if(total<2)return;
-  let idx=0,timer=null;
-  const INTERVAL=4000;
-  // 점 생성
-  for(let i=0;i<total;i++){
-    const b=document.createElement('button');
-    b.className='carousel-dot'+(i===0?' is-active':'');
-    b.type='button';
-    b.setAttribute('aria-label',`카드 ${i+1}`);
-    b.addEventListener('click',()=>{go(i);restart()});
-    dotsWrap.appendChild(b);
-  }
-  const dots=dotsWrap.children;
-  function go(i){
-    idx=(i+total)%total;
-    track.style.transform=`translateX(-${idx*100}%)`;
-    for(let k=0;k<total;k++){
-      dots[k].classList.toggle('is-active',k===idx);
-      slides[k].classList.toggle('is-active',k===idx);
+    // 섹션 진입 페이드인 (IntersectionObserver)
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!reduce && 'IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+      document.querySelectorAll('.reveal').forEach((el) => io.observe(el));
+    } else {
+      document.querySelectorAll('.reveal').forEach((el) => el.classList.add('in'));
     }
-  }
-  // 첫 슬라이드 강조
-  slides[0].classList.add('is-active');
-  function next(){go(idx+1)}
-  function start(){stop();timer=setInterval(next,INTERVAL)}
-  function stop(){if(timer){clearInterval(timer);timer=null}}
-  function restart(){stop();start()}
-  const wrap=track.parentElement;
-  wrap.addEventListener('mouseenter',stop);
-  wrap.addEventListener('mouseleave',start);
-  // viewport 진입 시 시작
-  if('IntersectionObserver' in window){
-    const io=new IntersectionObserver(entries=>{
-      entries.forEach(e=>e.isIntersecting?start():stop());
-    },{threshold:.3});
-    io.observe(wrap);
-  }else start();
-})();
-</script>
+  </script>
 </body>
 </html>

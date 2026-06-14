@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>펜팔 사서함 · morning-mom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f3fb;--card:#fff;--fg:#3c2f55;--muted:#8a7aa1;
+    --accent:#a890d4;--accent-h:#6a4fa3;--border:#e3d8f0;--warm:#f3eef9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:'Gowun Batang','Apple SD Gothic Neo',sans-serif;
+    line-height:1.55;padding:32px 16px;
+  }
+  .container{max-width:1100px;margin:0 auto}
+  header{text-align:center;margin-bottom:32px}
+  h1{
+    font-family:'Gaegu',cursive;font-weight:700;font-size:46px;
+    color:var(--accent-h);letter-spacing:-0.5px;
+  }
+  .subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+  .nav{margin-top:14px;font-size:14px}
+  .nav a{color:var(--accent-h);text-decoration:none;margin:0 8px}
+  .nav a:hover{text-decoration:underline}
+  .intro{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:16px;padding:24px 28px;margin-bottom:28px;
+  }
+  .intro h2{
+    font-family:'Gaegu',cursive;font-size:24px;color:var(--accent-h);
+    margin-bottom:10px;
+  }
+  .intro p{color:var(--fg);font-size:15px;margin-bottom:8px}
+  .intro .topic{
+    display:inline-block;margin-top:8px;padding:6px 14px;
+    background:var(--accent);color:#fff;border-radius:999px;
+    font-size:13px;font-weight:600;
+  }
+  .send-cta{
+    display:inline-block;margin-top:14px;padding:11px 22px;
+    background:var(--accent);color:#fff;border-radius:999px;
+    font-size:14px;font-weight:600;text-decoration:none;
+    transition:.15s;
+  }
+  .send-cta:hover{background:var(--accent-h)}
+  .meta{text-align:center;color:var(--muted);font-size:13px;margin-bottom:18px}
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:20px;
+  }
+  .item{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 16px rgba(80,60,120,.06);
+    transition:transform .15s,box-shadow .15s;cursor:pointer;
+  }
+  .item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(80,60,120,.12)}
+  .item img{width:100%;height:auto;display:block;background:#efe6f7}
+  .item .info{padding:12px 14px}
+  .item .date{font-family:'Gaegu',cursive;font-size:18px;color:var(--fg)}
+  .item .tag{font-size:12px;color:var(--muted);margin-top:2px}
+  .item .preview{
+    font-family:'Gaegu',cursive;font-size:14px;color:var(--muted);
+    margin-top:8px;line-height:1.4;white-space:pre-wrap;
+    max-height:60px;overflow:hidden;
+  }
+  .empty{
+    text-align:center;color:var(--muted);padding:60px 20px;
+    background:var(--warm);border:1px dashed var(--border);border-radius:12px;
+  }
+  .lightbox{
+    position:fixed;inset:0;background:rgba(50,30,70,.92);
+    display:none;align-items:center;justify-content:center;
+    padding:20px;cursor:pointer;z-index:100;
+  }
+  .lightbox.open{display:flex}
+  .lightbox img{
+    max-width:95vw;max-height:90vh;border-radius:8px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  footer{
+    text-align:center;color:var(--muted);font-size:12px;
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
+  }
+  footer a{color:var(--accent-h)}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>📮 펜팔 사서함</h1>
+    <p class="subtitle">이름 없이, 한 줄로 부치는 편지</p>
+    <nav class="nav">
+      <a href="./">← 카드 만들기</a>
+      <a href="gallery.html">📷 갤러리</a>
+    </nav>
+  </header>
+
+  <div class="intro">
+    <h2>펜팔이란?</h2>
+    <p>매주 다른 주제로, <strong>익명으로 한 줄을 부치는 공간</strong>이에요.</p>
+    <p>받는 사람도 보내는 사람도 모르지만, 같은 주제로 쓰인 글들이 한 사서함에 모입니다.</p>
+    <p>다음 주에는 또 다른 주제가 열리고, 이번 주의 편지들은 그대로 사서함에 남아 있어요.</p>
+    <div style="margin-top:14px">
+      <span class="topic">📌 이번 주 주제 — 그리운 사람</span>
+    </div>
+    <a href="./?topic=penpal" class="send-cta">✍️ 나도 익명으로 한 줄 부치기</a>
+  </div>
+
+  <section id="mine-section" style="margin-bottom:40px" hidden>
+    <h2 style="font-family:'Gaegu',cursive;font-size:28px;color:var(--accent-h);text-align:center;margin-bottom:6px">💌 내가 이번 주 부친 편지</h2>
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:18px">본인 기기에서만 보이는 부친 흔적이에요. 운영진의 진짜 사서함 연동은 다음 라운드 예정.</p>
+    <div class="grid" id="mine-grid"></div>
+  </section>
+
+  <h2 style="font-family:'Gaegu',cursive;font-size:28px;color:var(--accent-h);text-align:center;margin-bottom:6px">📬 이번 주 사서함</h2>
+  <div class="meta" id="count">로딩 중...</div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>아직 도착한 편지가 없어요. 첫 편지를 부쳐보세요 →</div>
+
+  <div class="lightbox" id="lightbox"><img id="lightbox-img" alt=""></div>
+
+  <footer>
+    <p>morning-mom · <a href="https://github.com/baezzanglion/morning-mom-web" target="_blank" rel="noopener">스폰지클럽 5주차</a></p>
+    <p style="margin-top:4px">한 코어, 세 인터페이스 — 사적 도구 · 공유 도구 · 모임</p>
+  </footer>
+</div>
+
+<script>
+async function loadPenpal(){
+  try{
+    const res = await fetch('manifest.json?v=' + Date.now());
+    if(!res.ok) throw new Error('manifest.json not found');
+    const all = await res.json();
+    const items = all.filter(it=>it.style==='penpal');
+    items.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    document.getElementById('count').textContent = `이번 주 ${items.length}장의 편지가 도착했어요`;
+    const grid = document.getElementById('grid');
+    if(items.length===0){
+      document.getElementById('empty').hidden = false;
+      return;
+    }
+    grid.innerHTML = items.map(it=>{
+      const preview = (it.preview||'').replace(/\|/g,'\n').replace(/\*\*/g,'');
+      return `
+        <div class="item" data-src="${it.file}">
+          <img src="${it.file}" alt="${it.date}" loading="lazy">
+          <div class="info">
+            <div class="date">${it.date||''}</div>
+            <div class="tag">${it.tag||''}</div>
+            ${preview?`<div class="preview">${escapeHtml(preview)}</div>`:''}
+          </div>
+        </div>
+      `;
+    }).join('');
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    grid.querySelectorAll('.item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        lbImg.src = el.dataset.src;
+        lb.classList.add('open');
+      });
+    });
+    lb.addEventListener('click',()=>lb.classList.remove('open'));
+  }catch(e){
+    document.getElementById('count').textContent = '사서함을 불러올 수 없어요: ' + e.message;
+    document.getElementById('empty').hidden = false;
+  }
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+// LocalStorage에 저장된 본인 부친 편지 표시
+function loadMine(){
+  try{
+    const mine=JSON.parse(localStorage.getItem('morning-mom-penpal-sent')||'[]');
+    if(mine.length===0) return;
+    document.getElementById('mine-section').hidden=false;
+    const grid=document.getElementById('mine-grid');
+    grid.innerHTML=mine.slice().reverse().map((it,idx)=>{
+      const preview=(it.msg||'').replace(/\|/g,'\n').replace(/\*\*/g,'').replace(/~~/g,'');
+      const imgSrc=it.dataUrl||'';
+      return `<div class="item" data-mine-src="${imgSrc}">
+        ${imgSrc?`<img src="${imgSrc}" alt="${it.date}" loading="lazy">`:''}
+        <div class="info">
+          <div class="date">${it.date||''} · 익명 '${it.nick||'?'}'</div>
+          <div class="tag">📌 ${it.topic||'주제 없음'}</div>
+          <div class="preview">${escapeHtml(preview)}</div>
+        </div>
+      </div>`;
+    }).join('');
+    const lb=document.getElementById('lightbox');
+    const lbImg=document.getElementById('lightbox-img');
+    grid.querySelectorAll('.item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const src=el.dataset.mineSrc;
+        if(src){ lbImg.src=src; lb.classList.add('open'); }
+      });
+    });
+  }catch(e){/* 무시 */}
+}
+loadMine();
+loadPenpal();
+</script>
+</body>
+</html>
