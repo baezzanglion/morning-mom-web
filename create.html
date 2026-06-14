@@ -3,20 +3,51 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>따뜻한 메시지 카드 · morning-mom</title>
+<title>오늘의 카드 만들기 · ON마음</title>
+<meta name="description" content="ON마음 — 소중한 가족에게 손글씨 카드로 마음을 켜는 도구">
+
+<!-- Open Graph -->
+<meta property="og:title" content="ON마음 — 오늘 한 줄 꺼내보기">
+<meta property="og:description" content="마음이 없어서가 아니라, 켜는 게 어려웠을 뿐. 한 장이면 충분해요.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://baezzanglion.github.io/morning-mom-web/assets/logo-full.png">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" href="assets/logo-icon.png">
+<link rel="apple-touch-icon" href="assets/logo-icon.png">
+
+<!-- Fonts: Pretendard(본문) + ON마음 손글씨 폰트들(카드 미리보기용 유지) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Hi+Melody&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#faf6f0;--card:#fff;--fg:#3c322d;--muted:#8a7a6f;
-    --accent:#aa827d;--accent-h:#8b6560;--border:#ece2d5;--warm:#fdf8f3;
+    /* ON마음 디자인 시스템 */
+    --terracotta:#D2674A;
+    --terracotta-deep:#B5503A;
+    --soft-rose:#F5E0DC;
+    --rose-tint:#FBEEEA;
+    --plum:#5A2E3E;
+    --plum-soft:#7A5562;
+    --warm-white:#FDFBF9;
+    /* 호환 토큰 (기존 클래스용) */
+    --bg:var(--warm-white);
+    --card:#fff;
+    --fg:var(--plum);
+    --muted:var(--plum-soft);
+    --accent:var(--terracotta);
+    --accent-h:var(--terracotta-deep);
+    --border:rgba(90,46,62,0.10);
+    --warm:var(--rose-tint);
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
-    background:var(--bg);color:var(--fg);
-    font-family:'Gowun Batang','Apple SD Gothic Neo',sans-serif;
-    line-height:1.55;padding:32px 16px;
+    background:var(--warm-white);color:var(--plum);
+    background-image:radial-gradient(120% 90% at 50% -10%, var(--rose-tint) 0%, var(--warm-white) 46%);
+    font-family:'Pretendard','Apple SD Gothic Neo',-apple-system,BlinkMacSystemFont,sans-serif;
+    line-height:1.6;padding:0 16px 32px;
+    -webkit-font-smoothing:antialiased;
   }
   .container{max-width:1280px;margin:0 auto}
   header{text-align:center;margin-bottom:32px}
@@ -222,11 +253,48 @@
   .toggle{
     display:flex;align-items:center;gap:6px;margin:0;font-size:14px;cursor:pointer;
   }
-  footer{
-    text-align:center;color:var(--muted);font-size:12px;
-    margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
+  /* ON마음 통일 — sticky header */
+  .om-header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(253,251,249,0.78);
+    backdrop-filter:saturate(160%) blur(12px);
+    -webkit-backdrop-filter:saturate(160%) blur(12px);
+    border-bottom:1px solid rgba(90,46,62,0.08);
+    margin:0 -16px 24px;padding:0 16px;
   }
-  footer a{color:var(--accent-h)}
+  .om-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    height:64px;max-width:1080px;margin:0 auto;
+  }
+  .om-logo{
+    display:flex;align-items:center;gap:9px;
+    font-size:1.35rem;font-weight:800;color:var(--plum);
+    text-decoration:none;letter-spacing:-0.02em;
+  }
+  .om-logo img{width:32px;height:32px;object-fit:contain}
+  .om-logo .on{color:var(--terracotta)}
+  .om-nav-links{display:flex;align-items:center;gap:4px}
+  .om-nav-links a{
+    padding:8px 14px;font-size:0.94rem;font-weight:600;
+    color:var(--plum-soft);text-decoration:none;
+    border-radius:999px;transition:.2s;
+  }
+  .om-nav-links a:hover{color:var(--plum);background:var(--rose-tint)}
+  /* ON마음 통일 — footer */
+  .om-footer{
+    background:var(--plum);color:var(--warm-white);
+    text-align:center;padding:36px 22px 32px;
+    margin:60px -16px 0;
+  }
+  .om-footer .f-logo-img{
+    width:120px;height:auto;margin:0 auto 10px;
+    background:var(--warm-white);border-radius:14px;
+    padding:8px 14px;display:block;
+  }
+  .om-footer .f-tag{font-size:0.94rem;opacity:0.82;margin-bottom:8px;font-weight:400}
+  .om-footer .copy{font-size:0.78rem;opacity:0.6}
+  /* 옛 footer 무력화 (남아있어도 안 보이게) */
+  body > div.container > footer{display:none}
 </style>
 </head>
 <body>
@@ -242,17 +310,25 @@
   <span style="font-family:'Hi Melody',cursive">가나다라마바사아자차카타파하 1234567890 ABC</span>
 </div>
 
+<header class="om-header">
+  <nav class="om-nav" aria-label="주요 메뉴">
+    <a href="index.html" class="om-logo" aria-label="ON마음 홈">
+      <img src="assets/logo-icon.png" alt="" aria-hidden="true">
+      <span><span class="on">ON</span>마음</span>
+    </a>
+    <div class="om-nav-links">
+      <a href="gallery.html" id="gallery-btn">갤러리<span id="gallery-count"></span></a>
+      <a href="pen-pal.html" id="penpal-btn">펜팔</a>
+      <a href="index.html">← 소개로</a>
+    </div>
+  </nav>
+</header>
+
 <div class="container">
 
-  <nav class="top-nav">
-    <a href="index.html" style="margin-right:auto">← 홈</a>
-    <a href="gallery.html" id="gallery-btn">📷 갤러리<span id="gallery-count"></span></a>
-    <a href="pen-pal.html" id="penpal-btn">📮 펜팔</a>
-  </nav>
-
-  <header class="hero" style="margin:24px 0 36px">
-    <h1 style="font-size:clamp(24px,3vw,32px);line-height:1.3">✏️ 오늘의 카드 만들기</h1>
-    <p class="subtitle" style="margin-top:8px">사랑하는 가족에게, 한 줄</p>
+  <header class="hero" style="margin:8px 0 28px;text-align:center">
+    <h1 style="font-size:clamp(1.6rem,4vw,2.1rem);font-weight:800;line-height:1.3;color:var(--plum);letter-spacing:-0.02em">오늘의 카드, 한 줄 꺼내볼까요?</h1>
+    <p style="margin-top:10px;color:var(--plum-soft);font-size:1rem">사랑하는 가족에게, 한 장이면 충분해요</p>
   </header>
 
   <div class="layout">
@@ -386,6 +462,12 @@
     <p style="margin-top:4px">하네스 + 오케스트레이션이 만드는 따뜻한 한 줄</p>
   </footer>
 </div>
+
+<footer class="om-footer">
+  <img src="assets/logo-full.png" alt="ON마음" class="f-logo-img">
+  <p class="f-tag">마음이 없어서가 아니라, 켜는 게 어려웠을 뿐</p>
+  <p class="copy">© 2026 ON마음. 한 장이면 충분해요.</p>
+</footer>
 
 <script>
 // ── 카드 렌더링 ─────────────────────────
