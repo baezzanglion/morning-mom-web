@@ -578,27 +578,43 @@
       animation: floaty 6s ease-in-out infinite;
     }
     .persona { background: var(--warm-white); padding-top: 0; }
-    .persona-wrap {
+    .persona-grid {
       display: grid;
-      gap: 28px;
-      align-items: center;
-      max-width: 720px;
+      grid-template-columns: 1fr;
+      gap: 36px;
+      max-width: 880px;
       margin: 0 auto;
     }
-    .persona-img {
-      margin: 0 auto;
-      max-width: 320px;
-      width: 84%;
+    @media (min-width: 760px) {
+      .persona-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+    }
+    .persona-card { text-align: center; }
+    .persona-card img {
+      width: 100%;
+      max-width: 360px;
       height: auto;
       border-radius: 22px;
       box-shadow: var(--shadow-md);
+      margin: 0 auto 18px;
+      display: block;
+      transition: transform .3s ease, box-shadow .3s ease;
     }
-    .persona-quote {
-      text-align: center;
+    .persona-card:hover img {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .persona-card .quote {
       font-family: var(--hand);
-      font-size: clamp(1.5rem, 4vw, 2.1rem);
+      font-size: clamp(1.4rem, 3.6vw, 1.9rem);
       color: var(--plum);
       line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .persona-card .label {
+      font-size: 0.92rem;
+      color: var(--plum-soft);
+      font-weight: 600;
+      letter-spacing: 0.02em;
     }
     .closing-img {
       margin: 0 auto 32px;
@@ -686,13 +702,27 @@
       </div>
     </section>
 
-    <!-- ===== Persona (워킹맘) ===== -->
-    <section class="persona pad" aria-label="페르소나 시각화">
-      <div class="wrap persona-wrap">
-        <img src="assets/persona-workingmom.png"
-             alt="바쁜 워킹맘이 폰으로 ON마음 카드를 만드는 모습"
-             class="persona-img reveal" />
-        <p class="persona-quote reveal">바쁜 와중에도, 3분이면<br />마음을 켤 수 있어요</p>
+    <!-- ===== Persona (두 사람을 위한) ===== -->
+    <section class="persona pad" aria-label="두 페르소나 시각화">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <p class="eyebrow">두 사람을 위한 마음</p>
+          <h2 class="section-title">막힌 자리는 달라도,<br />마음은 똑같이 깊어요</h2>
+        </div>
+        <div class="persona-grid stagger">
+          <figure class="persona-card reveal" style="--i:0">
+            <img src="assets/persona-a-man.webp"
+                 alt="혼자 있는 밤, 폰으로 카드를 만드는 무뚝뚝한 효자" loading="lazy" />
+            <p class="quote">혼자 있는 밤,<br />마음을 켜는 한 줄</p>
+            <p class="label">— 무뚝뚝한 효자 (38세)</p>
+          </figure>
+          <figure class="persona-card reveal" style="--i:1">
+            <img src="assets/persona-b-workingmom.webp"
+                 alt="바쁜 와중 책상에서 카드를 만드는 워킹맘" loading="lazy" />
+            <p class="quote">바쁜 와중에도,<br />3분이면 충분해요</p>
+            <p class="label">— 바쁜 워킹맘 (35세)</p>
+          </figure>
+        </div>
       </div>
     </section>
 
