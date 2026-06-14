@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>갤러리 · morning-mom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf6f0;--card:#fff;--fg:#3c322d;--muted:#8a7a6f;
+    --accent:#aa827d;--accent-h:#8b6560;--border:#ece2d5;--warm:#fdf8f3;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--fg);
+    font-family:'Gowun Batang','Apple SD Gothic Neo',sans-serif;
+    line-height:1.55;padding:32px 16px;
+  }
+  .container{max-width:1280px;margin:0 auto}
+  header{text-align:center;margin-bottom:40px}
+  h1{
+    font-family:'Gaegu',cursive;font-weight:700;font-size:42px;
+    color:var(--accent-h);letter-spacing:-0.5px;
+  }
+  .subtitle{color:var(--muted);font-size:14px;margin-top:6px}
+  .nav{margin-top:14px;font-size:14px}
+  .nav a{color:var(--accent-h);text-decoration:none;margin:0 8px}
+  .nav a:hover{text-decoration:underline}
+  .meta{text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px}
+  .grid{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+    gap:20px;
+  }
+  .item{
+    background:var(--card);border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;
+    box-shadow:0 4px 16px rgba(60,50,45,.06);
+    transition:transform .15s,box-shadow .15s;cursor:pointer;
+  }
+  .item:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(60,50,45,.12)}
+  .item img{width:100%;height:auto;display:block;background:#f5ede4}
+  .item .info{padding:12px 14px}
+  .item .date{font-family:'Gaegu',cursive;font-size:18px;color:var(--fg)}
+  .item .tag{font-size:12px;color:var(--muted);margin-top:2px}
+  .item .preview{
+    font-family:'Gaegu',cursive;font-size:14px;color:var(--muted);
+    margin-top:8px;line-height:1.4;white-space:pre-wrap;
+    max-height:60px;overflow:hidden;
+  }
+  .empty{
+    text-align:center;color:var(--muted);padding:60px 20px;
+    background:var(--warm);border:1px dashed var(--border);border-radius:12px;
+  }
+  /* 라이트박스 */
+  .lightbox{
+    position:fixed;inset:0;background:rgba(40,30,25,.92);
+    display:none;align-items:center;justify-content:center;
+    flex-direction:column;gap:18px;
+    padding:20px;cursor:pointer;z-index:100;
+  }
+  .lightbox.open{display:flex}
+  .lightbox img{
+    max-width:95vw;max-height:80vh;border-radius:8px;
+    box-shadow:0 24px 60px rgba(0,0,0,.5);
+  }
+  .lightbox-action{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:12px 22px;background:var(--accent);color:#fff;
+    border:none;border-radius:999px;font-family:inherit;
+    font-size:15px;font-weight:600;cursor:pointer;
+    text-decoration:none;transition:.15s;
+    box-shadow:0 4px 14px rgba(0,0,0,.3);
+  }
+  .lightbox-action:hover{background:var(--accent-h)}
+  footer{
+    text-align:center;color:var(--muted);font-size:12px;
+    margin-top:48px;padding-top:24px;border-top:1px solid var(--border);
+  }
+  footer a{color:var(--accent-h)}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <h1>morning-mom 갤러리</h1>
+    <p class="subtitle">손글씨로 보낸 한 줄, 누적된 자국</p>
+    <nav class="nav">
+      <a href="./">← 카드 만들기</a>
+      <a href="pen-pal.html">📮 펜팔 사서함</a>
+      <a href="https://github.com/baezzanglion/morning-mom-web" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
+
+  <div class="meta" id="count">로딩 중...</div>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" hidden>아직 카드가 없어요. 첫 카드를 만들어보세요 →</div>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lightbox-img" alt="">
+    <a id="lightbox-action" class="lightbox-action" href="#">✏️ 이 문구로 카드 만들기</a>
+  </div>
+
+  <footer>
+    <p>morning-mom · <a href="https://github.com/baezzanglion/morning-mom-web" target="_blank" rel="noopener">스폰지클럽 3·4주차</a></p>
+    <p style="margin-top:4px">하네스 + 오케스트레이션 + 디자인 시스템이 만드는 따뜻한 한 줄</p>
+  </footer>
+</div>
+
+<script>
+async function loadGallery(){
+  try{
+    const res = await fetch('manifest.json?v=' + Date.now());
+    if(!res.ok) throw new Error('manifest.json not found');
+    const all = await res.json();
+    // 펜팔 카드는 별도 페이지(pen-pal.html)에서 표시. 갤러리는 일반 카드만.
+    const items = all.filter(it=>it.style!=='penpal');
+    items.sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+    document.getElementById('count').textContent = `카드 ${items.length}장`;
+    const grid = document.getElementById('grid');
+    if(items.length===0){
+      document.getElementById('empty').hidden = false;
+      return;
+    }
+    const VALID_TONES = ['다정','위트','차분'];
+    grid.innerHTML = items.map((it,idx)=>{
+      const preview = (it.preview||'').replace(/\|/g,'\n').replace(/\*\*/g,'');
+      return `
+        <div class="item" data-idx="${idx}">
+          <img src="${it.file}" alt="${it.date}" loading="lazy">
+          <div class="info">
+            <div class="date">${it.date||''}</div>
+            <div class="tag">${it.tag||it.style||''}</div>
+            ${preview?`<div class="preview">${escapeHtml(preview)}</div>`:''}
+          </div>
+        </div>
+      `;
+    }).join('');
+    // 라이트박스
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lightbox-img');
+    const lbAction = document.getElementById('lightbox-action');
+    grid.querySelectorAll('.item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const it = items[+el.dataset.idx];
+        lbImg.src = it.file;
+        // 톤 추정: tag 첫 단어가 유효 톤이면 사용, 아니면 기본 '다정'
+        const firstTag = (it.tag||'').split('·')[0].trim();
+        const tone = VALID_TONES.includes(firstTag) ? firstTag : '다정';
+        const msg = it.preview||'';
+        const url = `./?message=${encodeURIComponent(msg)}&tone=${encodeURIComponent(tone)}`;
+        lbAction.href = url;
+        lb.classList.add('open');
+      });
+    });
+    // 라이트박스 배경 클릭 → 닫기. 버튼 클릭은 이동.
+    lb.addEventListener('click',(e)=>{
+      if(e.target === lbAction) return; // 버튼은 그대로 이동
+      lb.classList.remove('open');
+    });
+    lbAction.addEventListener('click',(e)=>e.stopPropagation());
+  }catch(e){
+    document.getElementById('count').textContent = '갤러리를 불러올 수 없어요: ' + e.message;
+    document.getElementById('empty').hidden = false;
+  }
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  })[c]);
+}
+loadGallery();
+</script>
+</body>
+</html>

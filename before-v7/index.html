@@ -10,11 +10,6 @@
   <meta property="og:title" content="ON마음 — 한 줄이면 충분해요" />
   <meta property="og:description" content="마음이 없어서가 아니라, 켜는 게 어려웠을 뿐. 오늘 한 줄 꺼내보기." />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://baezzanglion.github.io/morning-mom-web/assets/logo-full.png" />
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="assets/logo-icon.png" />
-  <link rel="apple-touch-icon" href="assets/logo-icon.png" />
 
   <!-- Fonts: Pretendard (본문) + Nanum Pen Script (손글씨 감성 accent) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -550,74 +545,12 @@
       .gallery-grid { grid-template-columns: repeat(3, 1fr); gap: 22px; }
     }
 
-    /* float anim for hero illustration */
+    /* float anim for hero card */
     @keyframes floaty {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+      0%, 100% { transform: rotate(-2.2deg) translateY(0); }
+      50% { transform: rotate(-2.2deg) translateY(-10px); }
     }
-
-    /* ===== Brand assets ===== */
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-    .logo-mark {
-      width: 36px;
-      height: 36px;
-      object-fit: contain;
-      display: block;
-    }
-    .hero-illustration {
-      margin: clamp(2.6rem, 7vw, 4rem) auto 0;
-      width: min(460px, 92vw);
-      height: auto;
-      border-radius: 24px;
-      box-shadow: var(--shadow-lg);
-      display: block;
-      animation: floaty 6s ease-in-out infinite;
-    }
-    .persona { background: var(--warm-white); padding-top: 0; }
-    .persona-wrap {
-      display: grid;
-      gap: 28px;
-      align-items: center;
-      max-width: 720px;
-      margin: 0 auto;
-    }
-    .persona-img {
-      margin: 0 auto;
-      max-width: 320px;
-      width: 84%;
-      height: auto;
-      border-radius: 22px;
-      box-shadow: var(--shadow-md);
-    }
-    .persona-quote {
-      text-align: center;
-      font-family: var(--hand);
-      font-size: clamp(1.5rem, 4vw, 2.1rem);
-      color: var(--plum);
-      line-height: 1.4;
-    }
-    .closing-img {
-      margin: 0 auto 32px;
-      max-width: 380px;
-      width: 82%;
-      height: auto;
-      border-radius: 22px;
-      box-shadow: var(--shadow-md);
-      display: block;
-    }
-    .f-logo-img {
-      width: 130px;
-      height: auto;
-      margin: 0 auto;
-      background: var(--warm-white);
-      border-radius: 14px;
-      padding: 10px 14px;
-      display: block;
-    }
+    .hero-card { animation: floaty 5.5s ease-in-out infinite; }
   </style>
 </head>
 <body>
@@ -625,10 +558,7 @@
   <!-- ===== Header ===== -->
   <header id="top">
     <div class="wrap nav">
-      <a href="#top" class="logo" aria-label="ON마음 홈">
-        <img src="assets/logo-icon.png" alt="" class="logo-mark" aria-hidden="true">
-        <span><span class="on">ON</span>마음</span>
-      </a>
+      <a href="#top" class="logo" aria-label="ON마음 홈"><span class="on">ON</span>마음</a>
       <nav class="nav-links" aria-label="주요 메뉴">
         <a href="gallery.html" class="text-link">갤러리</a>
         <a href="pen-pal.html" class="text-link">펜팔</a>
@@ -647,9 +577,15 @@
         <p class="sub reveal">소중한 사람에게, 한 줄이면 충분해요 — ON마음</p>
         <a href="create.html" class="btn btn-lg reveal">오늘 한 줄 꺼내보기 <span class="arrow" aria-hidden="true">→</span></a>
 
-        <img src="assets/hero-illustration.png"
-             alt="청년이 폰으로 ON마음 카드를 만들고, 받은 어머니가 감동하는 장면"
-             class="hero-illustration reveal" />
+        <div class="hero-card reveal" aria-hidden="true">
+          <div class="tape"></div>
+          <div class="to">사랑하는 엄마에게,</div>
+          <div class="line w1"></div>
+          <div class="line w2"></div>
+          <div class="line w3"></div>
+          <div class="sign">— 막내가</div>
+          <div class="heart">♥</div>
+        </div>
       </div>
     </section>
 
@@ -683,16 +619,6 @@
             <p class="sol"><span class="tri" aria-hidden="true">→</span><span>오늘의 단서·분위기까지 알아서</span></p>
           </article>
         </div>
-      </div>
-    </section>
-
-    <!-- ===== Persona (워킹맘) ===== -->
-    <section class="persona pad" aria-label="페르소나 시각화">
-      <div class="wrap persona-wrap">
-        <img src="assets/persona-workingmom.png"
-             alt="바쁜 워킹맘이 폰으로 ON마음 카드를 만드는 모습"
-             class="persona-img reveal" />
-        <p class="persona-quote reveal">바쁜 와중에도, 3분이면<br />마음을 켤 수 있어요</p>
       </div>
     </section>
 
@@ -832,9 +758,6 @@
     <!-- ===== Closing ===== -->
     <section class="closing pad" aria-label="마무리">
       <div class="wrap reveal">
-        <img src="assets/reception-mom.png"
-             alt="ON마음 카드를 받은 어머니의 미소"
-             class="closing-img" />
         <div class="heart-top" aria-hidden="true">♥</div>
         <p>당신이 보낸 따뜻한 마음이<br />누군가를 위로하고<br />하루를 살아내게 했어요.</p>
         <p class="thanks">— 고맙습니다.</p>
@@ -845,9 +768,7 @@
 
   <!-- ===== Footer ===== -->
   <footer>
-    <div class="f-logo">
-      <img src="assets/logo-full.png" alt="ON마음" class="f-logo-img" />
-    </div>
+    <div class="f-logo"><span class="on">ON</span>마음</div>
     <p class="f-tag">마음이 없어서가 아니라, 켜는 게 어려웠을 뿐</p>
     <div class="socials">
       <a href="https://www.instagram.com/p/DZSC7E8iTur/" target="_blank" rel="noopener" aria-label="인스타그램">
